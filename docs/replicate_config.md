@@ -28,8 +28,13 @@ You will need a few things for this tutorial:
 
 When you have the absolute file paths to all of the files mentioned above, run the following command:
 ```bash
-$ Rscript src/make_json_replicates.R  ${gitdir} ${base_json} ${dmaqc_meta} ${ref_standards} \
-                                                                        ${fastq_dir} ${config_dir} 
+$ Rscript src/make_json_replicates.R  -g ${gitdir} \
+                                        -j ${base_json} \
+                                        -m ${dmaqc_meta} \
+                                        -r ${ref_standards} \
+                                        -f ${fastq_dir} \
+                                        -o ${config_dir} 
 ```
+Add the `--gcp` flag if `${fastq_dir}` points to a GCP bucket, not a local path. 
 
 The result will be a single JSON-formatted config file in `${config_dir}` for every tissue, sex, timepoint, intervention/exercise protocol combination of the samples included in `${fastq_dir}`. Each file will be named `${sampleTypeCode}_${Protocol}_${intervention}_${sex}_${sacrificeTime}` according to the corresponding DMAQC metadata. Click [here](../examples/rat_with_replicates_example.json) to see an example of what these config files should look like.  
