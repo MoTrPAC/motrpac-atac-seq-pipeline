@@ -1,0 +1,68 @@
+val	key	column
+0h	1	sacrificeTime
+0.5h	2	sacrificeTime
+1h	3	sacrificeTime
+4h	4	sacrificeTime
+7h	5	sacrificeTime
+24h	6	sacrificeTime
+48h	7	sacrificeTime
+1w	8	sacrificeTime
+2w	9	sacrificeTime
+4w	10	sacrificeTime
+8w	11	sacrificeTime
+female	1	sex
+male	2	sex
+Rat PaxGene RNA	30	sampleTypeCode
+Rat Plasma	31	sampleTypeCode
+Rat Packed Cells	32	sampleTypeCode
+Rat Hippocampus	33	sampleTypeCode
+Rat Cortex	34	sampleTypeCode
+Rat Hypothalamus	35	sampleTypeCode
+Rat Gastrocnemius	36	sampleTypeCode
+Rat Vastus Lateralis	37	sampleTypeCode
+Rat Tibia	38	sampleTypeCode
+Rat Heart	39	sampleTypeCode
+Rat Kidney	40	sampleTypeCode
+Rat Adrenals	41	sampleTypeCode
+Rat Colon	42	sampleTypeCode
+Rat Spleen	43	sampleTypeCode
+Rat Testes	44	sampleTypeCode
+Rat Ovaries	45	sampleTypeCode
+Rat Brown Adipose	46	sampleTypeCode
+Rat White Adipose	47	sampleTypeCode
+Rat Aorta	48	sampleTypeCode
+Rat Lung	49	sampleTypeCode
+Rat Small Intestine	50	sampleTypeCode
+Rat Liver	51	sampleTypeCode
+Rat Hippocampus Powder	52	sampleTypeCode
+Rat Cortex Powder	53	sampleTypeCode
+Rat Hypothalamus Powder	54	sampleTypeCode
+Rat Gastrocnemius Powder	55	sampleTypeCode
+Rat Vastus Lateralis Powder	56	sampleTypeCode
+Rat Tibia Powder	57	sampleTypeCode
+Rat Heart Powder	58	sampleTypeCode
+Rat Kidney Powder	59	sampleTypeCode
+Rat Adrenal Powder	60	sampleTypeCode
+Rat Colon Powder	61	sampleTypeCode
+Rat Spleen Powder	62	sampleTypeCode
+Rat Testes Powder	63	sampleTypeCode
+Rat Ovaries Powder	64	sampleTypeCode
+Rat Aorta Powder	65	sampleTypeCode
+Rat Lung Powder	66	sampleTypeCode
+Rat Small Intestine Powder	67	sampleTypeCode
+Rat Liver Powder	68	sampleTypeCode
+Rat Brown Adipose Powder	69	sampleTypeCode
+Rat White Adipose Powder	70	sampleTypeCode
+phase1a	1	Protocol
+phase1b	2	Protocol
+pilot	3	Protocol
+Joslin	910	siteName
+Florida	930	siteName
+Iowa	940	siteName
+acute	1	intervention
+training	2	intervention
+control	3	intervention
+Fischer 344	1	species
+Fischer 344 X Brown Norway	2	species
+6 months	1	ageGroup
+18 months	2	ageGroup

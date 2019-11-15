@@ -1,0 +1,71 @@
+{
+    "atac.title" : "MoTrPAC PASS1A",
+    "atac.pipeline_type" : "atac",
+    
+    "atac.genome_tsv" : "~/ATAC_PIPELINE/REFERENCES/motrpac_rn6/motrpac_rn6.tsv",
+
+    "atac.align_only" : false,
+    "atac.paired_end" : true,
+    "atac.auto_detect_adapter" : true,
+    "atac.multimapping" : 4,
+
+    "atac.enable_idr" : true,
+    "atac.idr_thresh" : 0.05,
+
+    "atac.enable_xcor" : false,
+    "atac.enable_count_signal_track" : false,
+
+    "atac.enable_tss_enrich" : true,
+
+    "atac.align_cpu" : 4,
+    "atac.align_mem_mb" : 20000,
+
+    "atac.filter_cpu" : 4,
+    "atac.filter_mem_mb" : 20000,
+
+    "atac.bam2ta_cpu" : 4,
+    "atac.bam2ta_mem_mb" : 20000,
+    
+    "atac.description" : "Rat-Gastrocnemius-Powder_phase1a_acute_female_0h",
+
+    "atac.fastqs_rep1_R1" : [
+        "/projects/motrpac/PASS1A/ATAC/NOVASEQ_BATCH1/fastq_raw/900XXXXXXXX_R1.fastq.gz"
+    ],
+
+    "atac.fastqs_rep1_R2" : [
+        "/projects/motrpac/PASS1A/ATAC/NOVASEQ_BATCH1/fastq_raw/900XXXXXXXX_R2.fastq.gz"
+    ],
+
+    "atac.fastqs_rep2_R1" : [
+        "/projects/motrpac/PASS1A/ATAC/NOVASEQ_BATCH1/fastq_raw/900XXXXXXXX_R1.fastq.gz"
+    ],
+
+    "atac.fastqs_rep2_R2" : [
+        "/projects/motrpac/PASS1A/ATAC/NOVASEQ_BATCH1/fastq_raw/900XXXXXXXX_R2.fastq.gz"
+    ],
+
+    "atac.fastqs_rep3_R1" : [
+        "/projects/motrpac/PASS1A/ATAC/NOVASEQ_BATCH1/fastq_raw/900XXXXXXXX_R1.fastq.gz"
+    ],
+
+    "atac.fastqs_rep3_R2" : [
+        "/projects/motrpac/PASS1A/ATAC/NOVASEQ_BATCH1/fastq_raw/900XXXXXXXX_R2.fastq.gz"
+    ],
+
+    "atac.fastqs_rep4_R1" : [
+        "/projects/motrpac/PASS1A/ATAC/NOVASEQ_BATCH1/fastq_raw/900XXXXXXXX_R1.fastq.gz"
+    ],
+
+    "atac.fastqs_rep4_R2" : [
+        "/projects/motrpac/PASS1A/ATAC/NOVASEQ_BATCH1/fastq_raw/900XXXXXXXX_R2.fastq.gz"
+    ],
+
+    "atac.fastqs_rep5_R1" : [
+        "/projects/motrpac/PASS1A/ATAC/NOVASEQ_BATCH1/fastq_raw/900XXXXXXXX_R1.fastq.gz"
+    ],
+
+    "atac.fastqs_rep5_R2" : [
+        "/projects/motrpac/PASS1A/ATAC/NOVASEQ_BATCH1/fastq_raw/900XXXXXXXX_R2.fastq.gz"
+    ]
+
+}
