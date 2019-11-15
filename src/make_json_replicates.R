@@ -45,7 +45,7 @@ meta <- meta[, lapply(.SD, as.character)]
 ## Subset metadata by sequenced samples
 ########################################################################################
 
-sample_names <- unique(gsub("_.*","",fastq_list)) # these should be named by vialLabel
+sample_names = unique(gsub("_.*","",unname(sapply(fastq_list, basename)))) # these should be named by vialLabel
 ref_standard <- sample_names[!(sample_names %in% meta[,vialLabel])]
 meta <- meta[vialLabel %in% sample_names]
 
@@ -56,7 +56,7 @@ meta <- meta[vialLabel %in% sample_names]
 uniq_comb <- unique(meta, by=c('sacrificeTime','sex','sampleTypeCode','Protocol','intervention'))
 write_fastq_to_json <- function(replicate_num, replicate_name, read, out=outfile, flist=fastq_list, last=FALSE){
   
-  fastq_files <- fastq_list[grepl(replicate_name, flist)]
+  fastq_files <- flist[grepl(replicate_name, flist)]
   
   read_file <- fastq_files[grep(paste0("_R",read),basename(fastq_files))]
   
