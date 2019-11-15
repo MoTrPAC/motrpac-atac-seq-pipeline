@@ -284,7 +284,7 @@ for dir in *; do
 done
 ```
     
-**Table 4.1.** Important files in `croo`-organized ENCODE ATAC-seq pipeline output.  
+**Table 4.1.** Important files in `Croo`-organized ENCODE ATAC-seq pipeline output.  
 
 | Subdirectory or file                      | Description                             |
 |-------------------------------------------|-----------------------------------------|
@@ -303,7 +303,7 @@ done
 [ENCODE recommends](https://www.encodeproject.org/atac-seq/) using the `overlap` peak sets when one prefers a low false negative rate but potentially higher false positives; they recommend using the `IDR` peaks when one prefers low false positive rates.
     
 ### 4.2 Generate a spreadsheet of QC metrics for all samples with `qc2tsv`
-This is most usefull if you ran the pipeline for multiple samples. **Step 4.1** generates a `qc/qc.json` file for each pipeline run. After installing `qc2tsv` (`pip install qc2tsv`), run the following command to compile a spreadsheet with QC from all samples: 
+This is most useful if you ran the pipeline for multiple samples. **Step 4.1** generates a `qc/qc.json` file for each pipeline run. After installing `qc2tsv` (`pip install qc2tsv`), run the following command to compile a spreadsheet with QC from all samples: 
 ```
 cd ${outdir}/atac
 qc2tsv $(find -path "*/qc/qc.json") --collapse-header > spreadsheet.tsv
