@@ -23,12 +23,11 @@ if(opt$gcp){
   # read from bucket
   fastq_list <- system(sprintf('gsutil ls %s',opt$fastq),intern=T)
   fastq_list <- unname(sapply(fastq_list, basename))
-  fastq_list <- fastq_list[!grepl("Undetermined",fastq_list)]
 }else{
   # read from directory 
   fastq_list <- list.files(opt$fastq, pattern="fastq.gz")
-  fastq_list <- fastq_list[!grepl("Undetermined",fastq_list)]
 }
+fastq_list <- fastq_list[!grepl("Undetermined",fastq_list)]
 
 ########################################################################################
 ## Read in metadata; replace values with human-readable definitions from Data Dictionary
