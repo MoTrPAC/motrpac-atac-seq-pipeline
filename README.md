@@ -14,15 +14,17 @@ This documentation is intended to help individuals who are preparing ATAC-seq da
 
 1. [Prepare ATAC-seq data for submission to the BIC](#1-prepare-atac-seq-data-for-submission-to-the-bic) 
 
-    1.1 Generate and format FASTQs 
+    1.1 Clone this repository
     
-    1.2 Collect additional documents  
+    1.2 Generate and format FASTQs 
     
-    1.3 Submit data  
+    1.3 Collect additional documents  
+    
+    1.4 Submit data  
     
 2. [Install and test ENCODE ATAC-seq pipeline and dependencies](#2-install-and-test-encode-atac-seq-pipeline-and-dependencies)    
     
-    2.1 Clone the repositories
+    2.1 Clone the ENCODE repository
 
     2.2 Install the `Conda` environment with all software dependencies
 
@@ -53,7 +55,16 @@ This documentation is intended to help individuals who are preparing ATAC-seq da
 
 ## 1. Prepare ATAC-seq data for submission to the BIC 
 
-### 1.1 Generate and format FASTQs 
+### 1.1 Clone this repository 
+This documentation will assume you clone it in a folder called `ATAC_PIPELINE` in your home directory. `~/ATAC_PIPELINE` is also the recommended destination folder for when you clone ENCODE's repository later. 
+```bash
+cd ~
+mkdir ATAC_PIPELINE
+cd ATAC_PIPELINE
+git clone https://github.com/nicolerg/motrpac-atac-seq-pipeline.git
+```
+
+### 1.2 Generate and format FASTQs 
 Each GET site (Stanford and MSSM) is responsible for sequencing the library and obtaining the demultiplexed FASTQ files for each sample. If sequencing is performed with NovaSeq, raw data is output as BCL files, which must be demultiplexed and converted to FASTQ files with `bcl2fastq` (version 2.20.0). `bcl2fastq v2.20.0` can be downloaded directly from Illumina [here](https://support.illumina.com/downloads/bcl2fastq-conversion-software-v2-20.html). 
 
 Prepare a sample sheet for demultiplexing. Find an example [here](examples/SampleSheet.csv).  
@@ -68,7 +79,7 @@ Prepare a sample sheet for demultiplexing. Find an example [here](examples/Sampl
 2. If applicable, load the correct version of `bcl2fastq`. For example, on Stanford SCG, run `module load bcl2fastq2/2.20.0.422`.  
 3. Run [src/bcl2fastq.sh](src/bcl2fastq.sh):
 ```
-bash src/bcl2fastq.sh ${bclfolder} ${samplesheet} ${outdir}
+bash ~/ATAC_PIPELINE/motrpac-atac-seq-pipeline/src/bcl2fastq.sh ${bclfolder} ${samplesheet} ${outdir}
 ```
 This makes two new directories:  
 1. `${outdir}/bcl2fastq`: Outputs of `bcl2fastq`  
@@ -83,12 +94,12 @@ bcl2fastq \
 ```
 This command will generate two FASTQ files (one for each read in the pair) per sample per lane, e.g. `${viallabel}_L${lane}_R{1,2}_001.fastq.gz`.  
 
-### 1.2 Collect additional documents  
+### 1.3 Collect additional documents  
 - Collect the laneBarcode HTML report in `${outdir}/bcl2fastq/Reports/html/*/all/all/all/laneBarcode.html`. This report must be included in the BIC data submission,
 - Generate `sample_metadata_YYYYMMDD.csv`. See [this table](https://docs.google.com/document/d/1vnB7ITAKnaZYc3v_FCdaDu3z-JXeDncRk5GnqzQVwRw/edit#heading=h.sqhy9p63uf9b) for a list of metrics that must be included in this file. 
 - Generate `file_manifest_YYYYMMDD.csv`. See the [GET CAS-to-BIC Data Transfer Guidelines](https://docs.google.com/document/d/1W1b5PVp2yjam4FU2IidGagqdA7lYpkTaD_LMeaN_n_k) for details about the format of this document. 
     
-### 1.3 Submit data  
+### 1.4 Submit data  
 Refer to the [GET CAS-to-BIC Data Transfer Guidelines](https://docs.google.com/document/d/1W1b5PVp2yjam4FU2IidGagqdA7lYpkTaD_LMeaN_n_k) for details about the directory structure for ATAC-seq data submissions. The following files are required:
 - `file_manifest_YYYYMMDD.csv`
 - `sample_metadata_YYYYMMDD.csv`
@@ -103,14 +114,11 @@ The ENCODE pipeline supports many cloud platforms and cluster engines. It also s
 
 While the BIC runs this pipeline on Google Cloud Platform, this documentation is tailored for consortium users who use non-cloud computing environments, including clusters and personal computers. Therefore, this documentation describes the `Conda` implementation. Refer to ENCODE's documentation for alternatives. 
 
-### 2.1 Clone the repositories
+### 2.1 Clone the ENCODE repository
 Clone the v1.5.3 ENCODE repository and this repository in a folder in your home directory:
 ```bash
-cd ~
-mkdir ATAC_PIPELINE
-cd ATAC_PIPELINE
+cd ~/ATAC_PIPELINE
 git clone --single-branch --branch v1.5.3 https://github.com/ENCODE-DCC/atac-seq-pipeline.git
-git clone https://github.com/nicolerg/motrpac-atac-seq-pipeline.git
 ```
 
 ### 2.2 Install the `Conda` environment with all software dependencies
