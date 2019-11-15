@@ -7,7 +7,7 @@ A configuration (config) file is a file in JSON format that specifies input para
 This tutorial walks you through the steps to quickly generate config files for a large number of samples with the same runtime parameters (e.g. memory requirements, reference genome).  
 
 You will need to define a few paths first: 
-1. `base_json`: A trucated JSON file with paramaters that are constant for all samples in this batch. Find an example [here](motrpac_config/base.json). `/path/to/genome.tsv` refers to the path to either `"motrpac_rn6.tsv"` or `"motrpac_hg38.tsv"` file generated in **Step 3**. Note that you **must** include the following parameters for consistency within MoTrPAC:
+1. `base_json`: A trucated JSON file with paramaters that are constant for all samples in this batch. Find an example [here](examples/base.json). `/path/to/genome.tsv` refers to the path to either `"motrpac_rn6.tsv"` or `"motrpac_hg38.tsv"` file generated in **Step 3**. Note that you **must** include the following parameters for consistency within MoTrPAC:
 ```
     "atac.genome_tsv" : "/path/to/genome.tsv",
     "atac.paired_end" : true,
@@ -21,7 +21,7 @@ You will need to define a few paths first:
 
 After you have defined the full paths in the variables described above, run the following command:
 ```bash
-$ bash ~/ATAC_PIPEPINE/motrpac-atac-supplemental/motrpac_src/make_json_singleton.sh ${base_json} ${fastq_dir} ${config_dir} 
+$ bash src/make_json_singleton.sh ${base_json} ${fastq_dir} ${config_dir} 
 ```
 
-The result will be a single JSON-formatted config file in `${config_dir}` for each sample included in `${fastq_dir}`. Click [here](../motrpac_config/singleton_example.json) to see an example of what these config files should look like.  
+The result will be a single JSON-formatted config file in `${config_dir}` for each sample included in `${fastq_dir}`. Click [here](../examples/singleton_example.json) to see an example of what these config files should look like.  
