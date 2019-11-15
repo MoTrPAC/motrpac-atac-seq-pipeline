@@ -1,28 +1,41 @@
 #!/bin/R
 
 library(data.table)
+library(optparse)
 
-args <- commandArgs(trailingOnly=TRUE)
-gitdir <- args[1]
-base_json <- args[2]
-dmaqc_meta <- args[3]
-refs <- args[4]
-fastq_dir <- args[5]
-outdir <- args[6]
+option_list <- list(
+  make_option(c("-g", "--gitdir"), help="Absolute path to motrpac-atac-seq-pipeline repository, e.g. '~/ATAC_PIPELINE/motrpac-atac-seq-pipeline'"),
+  make_option(c("-j", "--json"), help="Global JSON parameters"),
+  make_option(c("-m", "--dmaqc"), help="Absolute path to DMAQC metadata file, e.g. ANI830.csv"),
+  make_option(c("-r", "--refstd"), help="Absolute path to Reference Standards in TXT format"),
+  make_option(c("-f", "--fastq", help="Absolute path to directory with FASTQ files, named ${viallabel}_R?.fastq.gz")),
+  make_option(c("-o", "--outdir", help="Absolute path to output directory for config files")),
+  make_option("--gcp", default = FALSE, action = "store_true", help="--fastq points to a GCP bucket")
+)
+
+opt <- parse_args(OptionParser(option_list=option_list))
 
 ########################################################################################
 ## Get list of FASTQ files 
 ########################################################################################
 
-fastq_list <- list.files(fastq_dir, pattern="fastq.gz")
-fastq_list <- fastq_list[!grepl("Undetermined",fastq_list)]
+if(opt$gcp){
+  # read from bucket
+  fastq_list <- system(sprintf('gsutil ls %s',opt$fastq),intern=T)
+  fastq_list <- unname(sapply(fastq_list, basename))
+  fastq_list <- fastq_list[!grepl("Undetermined",fastq_list)]
+}else{
+  # read from directory 
+  fastq_list <- list.files(opt$fastq, pattern="fastq.gz")
+  fastq_list <- fastq_list[!grepl("Undetermined",fastq_list)]
+}
 
 ########################################################################################
 ## Read in metadata; replace values with human-readable definitions from Data Dictionary
 ########################################################################################
 
-meta <- fread(dmaqc_meta, sep=',', header=TRUE)
-dict <- fread(sprintf('%s/motrpac_docs/meta_pass_data_dict.txt',gitdir), sep='\t', header=TRUE)
+meta <- fread(opts$dmaqc, sep=',', header=TRUE)
+dict <- fread(sprintf('%s/src/meta_pass_data_dict.txt',opts$gitdir), sep='\t', header=TRUE)
 
 for (col in c('sacrificeTime', 'sex', 'sampleTypeCode', 'Protocol', 'intervention', 'siteName')){
   meta[, c(col) := dict[column==col,val][ match(meta[,get(col)], dict[column==col, key]) ] ]
@@ -72,7 +85,7 @@ write_fastq_to_json <- function(replicate_num, replicate_name, read, out=outfile
 }
 
 for (id in as.character(uniq_comb[,barcode])){
-
+  
   sub <- uniq_comb[barcode==id,.(sampleTypeCode,Protocol,intervention,sex,sacrificeTime)]
   replicates <- unique(merge(sub, meta, by=c('sacrificeTime','sex','sampleTypeCode','Protocol','intervention'))[,vialLabel])
   
@@ -80,9 +93,9 @@ for (id in as.character(uniq_comb[,barcode])){
   description <- gsub(' ','-',paste(unname(unlist(sub[1])), collapse='_'))
   
   # generate JSON file for each set of replicates
-  outfile <- paste0(outdir, '/', description, '.json')
+  outfile <- paste0(opt$outdir, '/', description, '.json')
   system(sprintf('echo "{" > %s',outfile))
-  system(sprintf('cat %s >> %s', base_json, outfile))
+  system(sprintf('cat %s >> %s', opt$json, outfile))
   
   # add description to JSON
   system(sprintf('echo "    \\"atac.description\\" : \\"%s\\"," >> %s', description, outfile))
@@ -97,25 +110,25 @@ for (id in as.character(uniq_comb[,barcode])){
       write_fastq_to_json(i, replicates[i], read=2)
     }
   }
-
+  
   system(sprintf('echo "}" >> %s',outfile))
   
 }
 
 # read in reference standard file 
-ref_meta <- fread(refs, sep='\t', header=TRUE)
+ref_meta <- fread(opt$refstd, sep='\t', header=TRUE)
 ref_meta <- ref_meta[,.(MTP_RefType, MTP_RefDescription, MTP_Ref2DBarcode, MTP_RefLabel)]
 
 # generate JSON file for each reference standard
 for (sample_name in ref_standard){
-
+  
   # make a character string to describe replicates
   description <- gsub(' ','-',paste(unname(unlist(ref_meta[as.character(MTP_RefLabel)==sample_name, .(MTP_RefType, MTP_RefDescription)])), collapse='_'))
   description <- gsub(',', '', description)
-
+  
   # generate JSON file for each set of replicates
-  outfile <- paste0(outdir, '/', description, '.json')
-  system(sprintf('cat %s > %s', base_json, outfile))
+  outfile <- paste0(opt$outdir, '/', description, '.json')
+  system(sprintf('cat %s > %s', opt$json, outfile))
   
   # add description to JSON
   system(sprintf('echo "    \\"atac.title\\" : \\"%s\\"," >> %s', description, outfile))
@@ -127,5 +140,3 @@ for (sample_name in ref_standard){
   
   system(sprintf('echo "}" >> %s',outfile))
 }
-
-
