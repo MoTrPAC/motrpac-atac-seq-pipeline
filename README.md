@@ -56,19 +56,19 @@ This documentation is intended to help individuals who are preparing ATAC-seq da
 ### 1.1 Generate and format FASTQs 
 Each GET site (Stanford and MSSM) is responsible for sequencing the library and obtaining the demultiplexed FASTQ files for each sample. If sequencing is performed with NovaSeq, raw data is output as BCL files, which must be demultiplexed and converted to FASTQ files with `bcl2fastq` (version 2.20.0). `bcl2fastq v2.20.0` can be downloaded directly from Illumina [here](https://support.illumina.com/downloads/bcl2fastq-conversion-software-v2-20.html). 
 
-Prepare a sample sheet for demultiplexing. Find an example [here](docs/samplesheet.csv).  
+Prepare a sample sheet for demultiplexing. Find an example [here](examples/SampleSheet.csv).  
 - The sample sheet must not include the `Adapter` or `AdapterRead2` settings. This will prevent `bcl2fastq` from automatically performing adapter trimming, which provides us with FASTQ files that include the fullest form of the raw data. Adapter trimming is performed downstream
 - `Sample_Name` and `Sample_ID` should correspond to vial labels; FASTQ files must follow the naming convention `${viallabel}_R?.fastq.gz` before submission to the BIC
 
-[motrpac_src/bcl2fastq.sh](motrpac_src/bcl2fastq.sh) provides code both to run `bcl2fastq` and rename files. It can be run as follows:  
+[src/bcl2fastq.sh](src/bcl2fastq.sh) provides code both to run `bcl2fastq` and rename files. It can be run as follows:  
 1. Define the following paths:
   - `bclfolder`: Path to sequencing output directory, e.g `181205_NB551514_0071_AHFHLGAFXY`
   - `samplesheet`: Path to the sample sheet, e.g. `${bclfolder}/SampleSheet.csv`
   - `outdir`: Path to root output folder, e.g. `/lab/data/NOVASEQ_BATCH1`
 2. If applicable, load the correct version of `bcl2fastq`. For example, on Stanford SCG, run `module load bcl2fastq2/2.20.0.422`.  
-3. Run [motrpac_src/bcl2fastq.sh](motrpac_src/bcl2fastq.sh):
+3. Run [src/bcl2fastq.sh](src/bcl2fastq.sh):
 ```
-bash motrpac_src/bcl2fastq.sh ${bclfolder} ${samplesheet} ${outdir}
+bash src/bcl2fastq.sh ${bclfolder} ${samplesheet} ${outdir}
 ```
 This makes two new directories:  
 1. `${outdir}/bcl2fastq`: Outputs of `bcl2fastq`  
@@ -97,7 +97,7 @@ Refer to the [GET CAS-to-BIC Data Transfer Guidelines](https://docs.google.com/d
 - `fastq_raw/*.fastq.gz`
 
 ## 2. Install and test ENCODE ATAC-seq pipeline and dependencies
-All steps in this section must only be performed once. After dependencies are installed and genome databases are built, skip to [here](https://github.com/nicolerg/motrpac-atac-seq-pipeline#3-run-the-encode-atac-seq-pipeline).
+All steps in this section must only be performed once. After dependencies are installed and genome databases are built, skip to [here](#3-run-the-encode-atac-seq-pipeline).
 
 The ENCODE pipeline supports many cloud platforms and cluster engines. It also supports `docker`, `singularity`, and `Conda` to resolve complicated software dependencies for the pipeline. There are special instructions for two major Stanford HPC servers (SCG4 and Sherlock).  
 
@@ -236,8 +236,8 @@ A configuration (config) file in JSON format that specifies input parameters is 
 
 Please click the appropriate link below for detailed instructions on how to automate the generation of config files for pipelines with singletons or replicates. This is particularly important for PASS data, as this repository provides a script to automatically group replicates in the same condition (protocol/timepoint/tissue/sex). 
 
-* [Prepare config files for replicates (PASS/rat)](motrpac_docs/replicate_config.md)
-* [Prepare config files for singletons (CASS/human)](motrpac_docs/single_config.md) 
+* [Prepare config files for replicates (PASS/rat)](docs/replicate_config.md)
+* [Prepare config files for singletons (CASS/human)](docs/single_config.md) 
 
 ### 4.2 Run the pipeline 
 Actually running the pipeline is straightforward. However, the command is different depending on the environment in which you set up the pipeline. Refer back to environment-specific instructions [here](https://github.com/ENCODE-DCC/caper/blob/master/README.md#activating-conda-environment).
