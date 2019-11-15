@@ -9,6 +9,7 @@ This tutorial walks you through the steps to quickly generate config files for a
 **Prerequisites:**
 * R 
 * R `data.table` package  
+* R `optparse` package 
 
 You will need a few things for this tutorial:  
 1. `gitdir`: The absolute path to this repository, e.g. `~/ATAC_PIPELINE/motrpac-atac-seq-pipeline` 
