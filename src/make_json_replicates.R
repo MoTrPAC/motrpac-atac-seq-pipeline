@@ -33,8 +33,8 @@ fastq_list <- fastq_list[!grepl("Undetermined",fastq_list)]
 ## Read in metadata; replace values with human-readable definitions from Data Dictionary
 ########################################################################################
 
-meta <- fread(opts$dmaqc, sep=',', header=TRUE)
-dict <- fread(sprintf('%s/src/meta_pass_data_dict.txt',opts$gitdir), sep='\t', header=TRUE)
+meta <- fread(opt$dmaqc, sep=',', header=TRUE)
+dict <- fread(sprintf('%s/src/meta_pass_data_dict.txt',opt$gitdir), sep='\t', header=TRUE)
 
 for (col in c('sacrificeTime', 'sex', 'sampleTypeCode', 'Protocol', 'intervention', 'siteName')){
   meta[, c(col) := dict[column==col,val][ match(meta[,get(col)], dict[column==col, key]) ] ]
