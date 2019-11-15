@@ -32,9 +32,9 @@ This documentation is intended to help individuals who are preparing ATAC-seq da
    
     2.5 [Install genome databases](#25-install-genome-databases)
     
-        2.5.1 Install the hg38 genome database
+      2.5.1 Install the hg38 genome database
     
-        2.5.2 Install the custom rn6 genome database 
+      2.5.2 Install the custom rn6 genome database 
 
 3. [Run the ENCODE ATAC-seq pipeline](#3-run-the-encode-atac-seq-pipeline)
     
