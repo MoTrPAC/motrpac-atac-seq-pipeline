@@ -11,8 +11,8 @@ This tutorial walks you through the steps to quickly generate config files for a
 * R `data.table` package  
 
 You will need a few things for this tutorial:  
-1. `gitdir`: The absolute path to this repository, e.g. `~/ATAC_PIPELINE/motrpac-atac-supplemental` 
-2. `base_json`: A trucated JSON file with paramaters that are constant for all samples in this batch. Find an example [here](../motrpac_config/base.json). `/path/to/genome.tsv` refers to the path to either `"motrpac_rn6.tsv"` or `"hg38.tsv"` file generated in **Step 3**. Note that you must include the following parameters for consistency within MoTrPAC:
+1. `gitdir`: The absolute path to this repository, e.g. `~/ATAC_PIPELINE/motrpac-atac-seq-pipeline` 
+2. `base_json`: A trucated JSON file with paramaters that are constant for all samples in this batch. Find an example [here](../examples/base.json). `/path/to/genome.tsv` refers to the path to either `"motrpac_rn6.tsv"` or `"hg38.tsv"` file generated in **Step 3**. Note that you must include the following parameters for consistency within MoTrPAC:
 ```
     "atac.genome_tsv" : "/path/to/genome.tsv",
     "atac.multimapping" : 4,
@@ -28,8 +28,7 @@ You will need a few things for this tutorial:
 
 When you have the absolute file paths to all of the files mentioned above, run the following command:
 ```bash
-$ Rscript ~/ATAC_PIPELINE/motrpac-atac-supplemental/motrpac_src/make_json_replicates.R  ${gitdir} \
-                                             ${base_json} ${dmaqc_meta} ${ref_standards} ${fastq_dir} ${config_dir} 
+$ Rscript src/make_json_replicates.R  ${gitdir} ${base_json} ${dmaqc_meta} ${ref_standards} ${fastq_dir} ${config_dir} 
 ```
 
-The result will be a single JSON-formatted config file in `${config_dir}` for every tissue, sex, timepoint, intervention/exercise protocol combination of the samples included in `${fastq_dir}`. Each file will be named `${sampleTypeCode}_${Protocol}_${intervention}_${sex}_${sacrificeTime}` according to the corresponding DMAQC metadata. Click [here](../motrpac_config/rat_with_replicates_example.json) to see an example of what these config files should look like.  
+The result will be a single JSON-formatted config file in `${config_dir}` for every tissue, sex, timepoint, intervention/exercise protocol combination of the samples included in `${fastq_dir}`. Each file will be named `${sampleTypeCode}_${Protocol}_${intervention}_${sex}_${sacrificeTime}` according to the corresponding DMAQC metadata. Click [here](../examples/rat_with_replicates_example.json) to see an example of what these config files should look like.  
