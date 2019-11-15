@@ -21,11 +21,10 @@ opt <- parse_args(OptionParser(option_list=option_list))
 
 if(opt$gcp){
   # read from bucket
-  fastq_list <- system(sprintf('gsutil ls %s',opt$fastq),intern=T)
-  fastq_list <- unname(sapply(fastq_list, basename))
+  fastq_list <- system(sprintf('gsutil ls %s | grep "fastq.gz"',opt$fastq),intern=T)
 }else{
   # read from directory 
-  fastq_list <- list.files(opt$fastq, pattern="fastq.gz")
+  fastq_list <- list.files(path=opt$fastq, pattern="fastq.gz", full.names=T)
 }
 fastq_list <- fastq_list[!grepl("Undetermined",fastq_list)]
 
@@ -55,9 +54,9 @@ meta <- meta[vialLabel %in% sample_names]
 ########################################################################################
 
 uniq_comb <- unique(meta, by=c('sacrificeTime','sex','sampleTypeCode','Protocol','intervention'))
-write_fastq_to_json <- function(replicate_num, replicate_name, read, out=outfile, fdir=fastq_dir, last=FALSE){
+write_fastq_to_json <- function(replicate_num, replicate_name, read, out=outfile, flist=fastq_list, last=FALSE){
   
-  fastq_files <- list.files(path=fdir, pattern=replicate_name, full.names=TRUE)
+  fastq_files <- fastq_list[grepl(replicate_name, flist)]
   
   read_file <- fastq_files[grep(paste0("_R",read),basename(fastq_files))]
   
