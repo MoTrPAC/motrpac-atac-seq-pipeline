@@ -115,10 +115,10 @@ The ENCODE pipeline supports many cloud platforms and cluster engines. It also s
 While the BIC runs this pipeline on Google Cloud Platform, this documentation is tailored for consortium users who use non-cloud computing environments, including clusters and personal computers. Therefore, this documentation describes the `Conda` implementation. Refer to ENCODE's documentation for alternatives. 
 
 ### 2.1 Clone the ENCODE repository
-Clone the v1.5.3 ENCODE repository and this repository in a folder in your home directory:
+Clone the v1.5.4 ENCODE repository and this repository in a folder in your home directory:
 ```bash
 cd ~/ATAC_PIPELINE
-git clone --single-branch --branch v1.5.3 https://github.com/ENCODE-DCC/atac-seq-pipeline.git
+git clone --single-branch --branch v1.5.4 https://github.com/ENCODE-DCC/atac-seq-pipeline.git
 ```
 
 ### 2.2 Install the `Conda` environment with all software dependencies
