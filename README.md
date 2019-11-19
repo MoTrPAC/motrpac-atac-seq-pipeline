@@ -220,6 +220,7 @@ elif [[ "${GENOME}" == "motrpac_rn6" ]]; then
   MITO_CHR_NAME="chrM"
   REF_FA="http://mitra.stanford.edu/montgomery/projects/motrpac/atac/SCG/motrpac_references/rn6_release96/Rattus_norvegicus.Rnor_6.0.dna.toplevel.standardized.fa.gz"
   TSS="http://mitra.stanford.edu/montgomery/projects/motrpac/atac/SCG/motrpac_references/rn6_release96/Rattus_norvegicus.Rnor_6.0.96_protein_coding.tss.bed.gz"
+  BLACKLIST=
 ```
 
 Specify a destination directory and install the MoTrPAC rn6 reference with the following command. We recommend not to run this installer on a login node of your cluster. It will take >8GB memory and >2h time. 
