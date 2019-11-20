@@ -223,7 +223,13 @@ elif [[ "${GENOME}" == "motrpac_rn6" ]]; then
   BLACKLIST=
 ```
 
-Specify a destination directory and install the MoTrPAC rn6 reference with the following command. We recommend not to run this installer on a login node of your cluster. It will take >8GB memory and >2h time. 
+The current version of the pipeline (1.5.4) also has some `tar` parameters that are not compatible with some OSs: `--sort=name --owner=root:0 --group=root:0 --mtime="UTC 2019-01-01"`. Run the following command to remove these parameters before running the script:
+
+```bash
+sed -i "s/--sort=name --owner.*//" ~/ATAC_PIPELINE/atac-seq-pipeline/scripts/build_genome_data.sh
+```
+
+Now run the script to build the custom genome database. Specify a destination directory and install the MoTrPAC rn6 reference with the following command. We recommend not to run this installer on a login node of your cluster. It will take >8GB memory and >2h time. 
 ```bash
 outdir=/path/to/reference/genome/motrpac_rn6
 bash ~/ATAC_PIPELINE/atac-seq-pipeline/scripts/build_genome_data.sh motrpac_rn6 ${outdir}
