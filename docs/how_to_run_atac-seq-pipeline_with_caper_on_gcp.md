@@ -93,6 +93,9 @@ sudo Rscript motrpac-atac-seq-pipeline/src/make_json_replicates.R -g ~/motrpac-a
 ### Submit workflows to caper server
 ```
 caper submit atac.wdl -i input_json/stanford/batch1/set1/Rat-Gastrocnemius-Powder_phase1a_acute_male_0.5h.json
+
+submitting in a loop
+for i in input_json/stanford/batch1/set2/*.json;do caper submit atac.wdl -i $i ;done
 ```
 ### Consolidate outputs using croo
 ```
