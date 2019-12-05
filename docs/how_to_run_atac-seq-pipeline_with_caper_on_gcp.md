@@ -4,11 +4,12 @@
 1. Python3
 2. pip3
 3. caper 0.6.0
-4. croo 0.2.1
+4. croo 0.2.1 , update to 0.3.1
 5. [cromwell47] (https://github.com/broadinstitute/cromwell/releases/download/47/cromwell-47.jar)
 6. [womtool47](https://github.com/broadinstitute/cromwell/releases/download/47/womtool-47.jar)
 7. Docker
 8. Java
+9. qc2tsv (0.6.0)
 
 Instructions on how to install some of these tools can be found [here](https://github.com/AshleyLab/motrpac-rna-seq-pipeline/blob/pipeline_test/vm_requirements.txt)
 
@@ -16,6 +17,12 @@ Instructions on how to install some of these tools can be found [here](https://g
 ```
 pip3 install 'caper==0.6.0'
 ```
+
+### Install qc2tsv
+```
+pip3 install qc2tsv
+```
+
 ## run docker without sudo
 You should be able to run docker without sudo , [source for fixing can be found in this link](https://techoverflow.net/2017/03/01/solving-docker-permissions)
 ## Add docker to group
@@ -52,7 +59,7 @@ docker rm <CONTAINER ID>
 Make sure mysql db is running before instantiating caper server
 ```docker ps```
 
-### Generate and configure ~/.caper/default.conf for caper, add parameters for mysql backend
+### Generate and configure ~/.caper/default.conf for gcp, add parameters for mysql backend
 ```
 caper init gcp
 ```
@@ -61,9 +68,9 @@ caper init gcp
 cromwell=/home/araja7/tools/cromwell-47.jar
 backend=gcp
 gcp-prj=motrpac-portal
-out-gcs-bucket=gs://rna-seq_araja/rna-seq/sinai/batch5_20191031/
-tmp-gcs-bucket=gs://rna-seq_araja/rna-seq/sinai/batch5_20191031/caper_tmp/
-tmp-dir=/data/tmp
+out-gcs-bucket=gs://rna-seq_araja/PASS/atac-seq/stanford/batch1/set1
+tmp-gcs-bucket=gs://rna-seq_araja/PASS/atac-seq/stanford/batch1/caper_tmp
+tmp-dir=/home/araja7/tmp_dir
 db=mysql
 mysql-db-ip=localhost
 mysql-db-port=3306
@@ -88,11 +95,11 @@ ctrl A + D
 ```
 caper submit atac.wdl -i input_json/stanford/batch1/set1/Rat-Gastrocnemius-Powder_phase1a_acute_male_0.5h.json
 ```
-### Consolidate outputs using croo
+### Consolidate outputs using croo, note croo takes only one metadata.json file at a time if you have multiples for loop through the list
 ```
-croo gs://rna-seq_araja/atac-seq/test_caper/atac/a1d42667-67e3-422b-97f1-70fe34d0e712/metadata.json --out-dir gs://rna-seq_araja/
-atac-seq/test_croo/atac_output/ --use-gsutil-over-aws-s3
 croo <metadata.json> --out-dir <gcp-bucket-output-path> --use-gsutil-over-aws-s3 --method copy
+caper list|grep "Succeeded"|grep -v "subsampled_gcp"|cut -f1 >wfids.txt
+for i in `cat wfids.txt`;do croo gs://rna-seq_araja/PASS/atac-seq/stanford/batch1/set1/atac/$i/metadata.json --out-dir gs://motrpac-portal-transfer-stanford/Output/atac-seq/batch1/ --use-gsutil-over-aws-s3 --method copy;done
 ```
 ### To Do
 
