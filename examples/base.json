@@ -1,26 +1,23 @@
     "atac.title" : "MoTrPAC PASS1A ATAC - gastroc",
-    "atac.genome_tsv" : "~/ATAC_PIPELINE/REFERENCES/motrpac_rn6/motrpac_rn6.tsv",
+    "atac.genome_tsv" : "gs://rna-seq_araja/references/rn/v96/atacv1.5.3/motrpac_rn6_gcp.tsv",
 
     "atac.pipeline_type" : "atac",
 
-    "atac.align_only" : false,
     "atac.paired_end" : true,
     "atac.auto_detect_adapter" : true,
-    "atac.multimapping" : 4,
 
-    "atac.enable_idr" : true,
-    "atac.idr_thresh" : 0.05,
-
-    "atac.enable_xcor" : false,
-    "atac.enable_count_signal_track" : false,
-
-    "atac.enable_tss_enrich" : true,
 
     "atac.align_cpu" : 4,
-    "atac.align_mem_mb" : 20000,
+    "atac.align_mem_mb" : 40000,
 
     "atac.filter_cpu" : 4,
-    "atac.filter_mem_mb" : 20000,
+    "atac.filter_mem_mb" : 40000,
 
     "atac.bam2ta_cpu" : 4,
-    "atac.bam2ta_mem_mb" : 20000,
+    "atac.bam2ta_mem_mb" : 40000,
+
+    "atac.spr_mem_mb" : 40000,
+    "atac.macs2_signal_track_mem_mb" : 40000,
+    "atac.preseq_mem_mb" : 40000,
+    "atac.macs2_signal_track_disks": "local-disk 400 HDD",
+

@@ -91,9 +91,18 @@ To detach a screen
 ```
 ctrl A + D
 ```
+### Generate config files on a gcp vm , clone [Motrpac-atac-seq-repo](https://github.com/MoTrPAC/motrpac-atac-seq-pipeline.git)
+
+```
+sudo Rscript motrpac-atac-seq-pipeline/src/make_json_replicates.R -g ~/motrpac-atac-seq-pipeline -j ~/motrpac-atac-seq-pipeline/examples/base.json -m ~/motrpac-atac-seq-pipeline/metadata/ANI830_all.csv -r ~/motrpac-atac-seq-pipeline/metadata/Stanford_StandardReferenceMaterial.txt -f gs://motrpac-portal-transfer-stanford/atac-seq/rat/batch1_20191025/fastq_raw -o ~/motrpac-atac-seq-pipeline/config/stanford/batch1/ --gcp
+```
+
 ### Submit workflows to caper server
 ```
 caper submit atac.wdl -i input_json/stanford/batch1/set1/Rat-Gastrocnemius-Powder_phase1a_acute_male_0.5h.json
+
+submitting in a loop
+for i in input_json/stanford/batch1/set2/*.json;do caper submit atac.wdl -i $i ;done
 ```
 ### Consolidate outputs using croo, note croo takes only one metadata.json file at a time if you have multiples for loop through the list
 ```
