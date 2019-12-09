@@ -104,12 +104,18 @@ caper submit atac.wdl -i input_json/stanford/batch1/set1/Rat-Gastrocnemius-Powde
 submitting in a loop
 for i in input_json/stanford/batch1/set2/*.json;do caper submit atac.wdl -i $i ;done
 ```
-### Consolidate outputs using croo, note croo takes only one metadata.json file at a time if you have multiples for loop through the list
+### Consolidate outputs using croo, note croo takes only one metadata.json file at a time if you have multiples for loop through the list (right now croo overwrites outputs- to do fix this)
 ```
 croo <metadata.json> --out-dir <gcp-bucket-output-path> --use-gsutil-over-aws-s3 --method copy
 caper list|grep "Succeeded"|grep -v "subsampled_gcp"|cut -f1 >wfids.txt
 for i in `cat wfids.txt`;do croo gs://rna-seq_araja/PASS/atac-seq/stanford/batch1/set1/atac/$i/metadata.json --out-dir gs://motrpac-portal-transfer-stanford/Output/atac-seq/batch1/ --use-gsutil-over-aws-s3 --method copy;done
 ```
+
+###Copying output files without croo
+```
+gsutil -m cp -r gs://rna-seq_araja/PASS/atac-seq/stanford/batch1/set1/atac/* gs://motrpac-portal-transfer-stanford/Output/atac-seq/batch1/
+```
+
 ### To Do
 
 read qc2tsv
