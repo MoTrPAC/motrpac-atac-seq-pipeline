@@ -121,8 +121,8 @@ cd ~/ATAC_PIPELINE
 git clone --single-branch --branch v1.5.4 https://github.com/ENCODE-DCC/atac-seq-pipeline.git
 ```
 
-### 2.2 Install the `Conda` environment with all software dependencies
-1. If `Conda` is not already installed on your system, follow [these instructions](https://github.com/ENCODE-DCC/atac-seq-pipeline/blob/master/docs/install_conda.md). Skip this step if `Conda` is already available. For example, Stanford SCG users should replace this step with `module load miniconda/3`.  
+### 2.2 Install the `Conda` environment with all software dependencies  
+1. Install `conda` by following [these instructions](https://github.com/ENCODE-DCC/atac-seq-pipeline/blob/master/docs/install_conda.md).  
 2. Start a `screen` session. 
 3. Uninstall and install the ENCODE ATAC-seq `Conda` environment:
 ```bash
@@ -186,6 +186,7 @@ INPUT_JSON=https://storage.googleapis.com/encode-pipeline-test-samples/encode-at
 #### 2.5.1 Install the hg38 genome database
 Specify a destination directory and install the ENCODE hg38 reference with the following command. We recommend not to run this installer on a login node of your cluster. It will take >8GB memory and >2h time.   
 ```bash  
+conda activate encode-atac-seq-pipeline
 outdir=/path/to/reference/genome/hg38
 bash ~/ATAC_PIPELINE/atac-seq-pipeline/scripts/download_genome_data.s hg38 ${outdir}  
 ```
@@ -231,9 +232,11 @@ sed -i "s/--sort=name --owner.*//" ~/ATAC_PIPELINE/atac-seq-pipeline/scripts/bui
 
 Now run the script to build the custom genome database. Specify a destination directory and install the MoTrPAC rn6 reference with the following command. We recommend not to run this installer on a login node of your cluster. It will take >8GB memory and >2h time. 
 ```bash
+conda activate encode-atac-seq-pipeline
 outdir=/path/to/reference/genome/motrpac_rn6
 bash ~/ATAC_PIPELINE/atac-seq-pipeline/scripts/build_genome_data.sh motrpac_rn6 ${outdir}
 ```
+**Note: If you get a `Could not localize` error when running the pipeline, try gunzipping (i.e. `gunzip *tar.gz`) the `${outdir}/bowtie2_index/*.tar.gz` files. This is a bug that needs to be fixed.**  
     
 ## 3. Run the ENCODE ATAC-seq pipeline  
 MoTrPAC will run the ENCODE pipeline both with singletons for human samples and replicates for rat samples. In both cases, many iterations of the pipeline will need to be run for each batch of sequencing data. This repository provides scripts to automate this process, for both rat and human samples. 
