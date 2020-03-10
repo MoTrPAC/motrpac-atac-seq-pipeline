@@ -4,6 +4,8 @@ This repository provides MoTrPAC-specific supplements to the [ENCODE ATAC-seq pi
 
 This documentation is intended to help individuals who are preparing ATAC-seq data for submission to the BIC or processing pilot samples with the full pipeline. For simplicity, this documentation explains how to run the full pipeline on a computer compatible with Conda environments. Users working on the cloud or in other environments can follow ENCODE's documentation as necessary. Post-processing scripts are intended to be useful to all users, regardless of environment. 
 
+**NOTE:** MoTrPAC uses ENCODE ATAC-seq pipeline version 1.7.0 for consistency within the consortium and reproducibilty outside of the consortium.  
+
 ### Important references:
 - GitHub repository for the ENCODE ATAC-seq pipeline: https://github.com/ENCODE-DCC/atac-seq-pipeline
 - ENCODE ATAC-seq pipeline documentation: https://www.encodeproject.org/atac-seq/
