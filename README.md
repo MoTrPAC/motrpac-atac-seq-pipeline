@@ -2,7 +2,7 @@
 
 This repository provides MoTrPAC-specific supplements to the [ENCODE ATAC-seq pipeline](https://github.com/ENCODE-DCC/atac-seq-pipeline). For additional details not directly related to running the ENCODE ATAC-seq pipeline or processing the results, see the most recent version of the MoTrPAC ATAC-seq QC and Analysis Pipeline MOP, available [here](https://docs.google.com/document/d/1vnB7ITAKnaZYc3v_FCdaDu3z-JXeDncRk5GnqzQVwRw/edit#heading=h.tjbixx8yyd33). 
 
-This documentation is intended to help individuals who are preparing ATAC-seq data for submission to the BIC or processing pilot samples with the full pipeline. For simplicity, this documentation explains how to run the full pipeline on a computer compatible with Conda environments. Users working on the cloud or in other environments can follow ENCODE's documentation as necessary. Post-processing scripts are intended to be useful to all users, regardless of environment. 
+This documentation is intended to help individuals who are preparing ATAC-seq data for submission to the BIC or processing pilot samples with the full pipeline. For simplicity, this documentation explains how to run the full pipeline on a computer compatible with `Conda` environments. Users working on the cloud or in other environments can follow ENCODE's documentation as necessary. Post-processing scripts are intended to be useful to all users, regardless of environment. 
 
 **NOTE:** MoTrPAC uses ENCODE ATAC-seq pipeline version 1.7.0 for consistency within the consortium and reproducibilty outside of the consortium.  
 
@@ -181,7 +181,7 @@ PIPELINE_CONDA_ENV=encode-atac-seq-pipeline
 WDL=~/ATAC_PIPELINE/atac-seq-pipeline/atac.wdl
 INPUT_JSON=https://storage.googleapis.com/encode-pipeline-test-samples/encode-atac-seq-pipeline/ENCSR356KRQ_subsampled_caper.json
 ```  
-Note that Caper writes all outputs to the current working directory, so first `cd` to the desired output directory before using `caper run` or `caper server`.   
+Note that `Caper` writes all outputs to the current working directory, so first `cd` to the desired output directory before using `caper run` or `caper server`.   
 
 Here is an example of how the test workflow is run on Stanford SCG (SLURM):  
 ```
@@ -309,7 +309,7 @@ done
 [ENCODE recommends](https://www.encodeproject.org/atac-seq/) using the `overlap` peak sets when one prefers a low false negative rate but potentially higher false positives; they recommend using the `IDR` peaks when one prefers low false positive rates.
     
 ### 4.2 Generate a spreadsheet of QC metrics for all samples with `qc2tsv`
-This is most useful if you ran the pipeline for multiple samples. **Step 4.1** generates a `qc/qc.json` file for each pipeline run. After installing `qc2tsv` within the `encode-atac-seq-pipeline` Conda environment (`pip install qc2tsv`), run the following command to compile a spreadsheet with QC from all samples: 
+This is most useful if you ran the pipeline for multiple samples. **Step 4.1** generates a `qc/qc.json` file for each pipeline run. After installing `qc2tsv` within the `encode-atac-seq-pipeline` `Conda` environment (`pip install qc2tsv`), run the following command to compile a spreadsheet with QC from all samples: 
 ```
 cd ${outdir}/atac
 qc2tsv $(find -path "*/qc/qc.json") --collapse-header > spreadsheet.tsv
