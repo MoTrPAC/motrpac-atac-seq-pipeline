@@ -115,25 +115,18 @@ The ENCODE pipeline supports many cloud platforms and cluster engines. It also s
 While the BIC runs this pipeline on Google Cloud Platform, this documentation is tailored for consortium users who use non-cloud computing environments, including clusters and personal computers. Therefore, this documentation describes the `Conda` implementation. Refer to ENCODE's documentation for alternatives. 
 
 ### 2.1 Clone the ENCODE repository
-Clone the v1.5.4 ENCODE repository and this repository in a folder in your home directory:
+Clone the v1.7.0 ENCODE repository and this repository in a folder in your home directory:
 ```bash
 cd ~/ATAC_PIPELINE
-git clone --single-branch --branch v1.5.4 https://github.com/ENCODE-DCC/atac-seq-pipeline.git
+git clone --single-branch --branch v1.7.0 https://github.com/ENCODE-DCC/atac-seq-pipeline.git
 ```
 
 ### 2.2 Install the `Conda` environment with all software dependencies  
-1. Install `conda` by following [these instructions](https://github.com/ENCODE-DCC/atac-seq-pipeline/blob/master/docs/install_conda.md).  
-2. Start a `screen` session. 
-3. Uninstall and install the ENCODE ATAC-seq `Conda` environment:
-```bash
-bash ~/ATAC_PIPELINE/atac-seq-pipeline/scripts/uninstall_conda_env.sh
-bash ~/ATAC_PIPELINE/atac-seq-pipeline/scripts/install_conda_env.sh
-```
+Install `conda` by following [these instructions](https://github.com/ENCODE-DCC/atac-seq-pipeline/blob/master/docs/install_conda.md). Perform Step 5 in a `screen` or `tmux` session, as it can take some time.   
 
 ### 2.3 Initialize `Caper`
 Installing the `Conda` environment also installs `Caper`. Make sure it works:
 ```bash
-# load/activate conda or miniconda module, if necessary
 conda activate encode-atac-seq-pipeline
 caper
 ```
@@ -171,7 +164,13 @@ aws-batch-arn | ARN for AWS Batch.
 aws-region | AWS region (e.g. us-west-1)
 out-s3-bucket | Output bucket path for AWS. This should start with `s3://`.
 gcp-prj | Google Cloud Platform Project
-out-gcs-bucket | Output bucket path for Google Cloud Platform. This should start with `gs://`.
+out-gcs-bucket | Output bucket path for Google Cloud Platform. This should start with `gs://`.  
+
+An important optional parameter is `db`. If you would like to enable call-catching (i.e. re-use ouputs from previous workflows, which is particularly useful if a workflow fails halfway through a pipeline), add the following lines to `~/.caper/default.conf`:  
+```
+db=file
+java-heap-run=4G
+```
 
 ### 2.4 Run a test sample 
 Follow [these platform-specific instructions](https://github.com/ENCODE-DCC/caper/blob/master/README.md#activating-conda-environment) to run a test sample. Use the following variable assignments:
@@ -179,6 +178,14 @@ Follow [these platform-specific instructions](https://github.com/ENCODE-DCC/cape
 PIPELINE_CONDA_ENV=encode-atac-seq-pipeline
 WDL=~/ATAC_PIPELINE/atac-seq-pipeline/atac.wdl
 INPUT_JSON=https://storage.googleapis.com/encode-pipeline-test-samples/encode-atac-seq-pipeline/ENCSR356KRQ_subsampled_caper.json
+```  
+Note that Caper writes all outputs to the current working directory, so first `cd` to the desired output directory before using `caper run` or `caper server`.   
+
+Here is an example of how the test workflow is run on Stanford SCG (SLURM):  
+```
+conda activate ${PIPELINE_CONDA_ENV}
+JOB_NAME=encode_test
+sbatch -A ${ACCOUNT} -J ${JOB_NAME} --export=ALL --mem 2G -t 4-0 --wrap "caper run ${WDL} -i ${INPUT_JSON}"
 ```
 
 ### 2.5 Install genome databases
@@ -188,7 +195,7 @@ Specify a destination directory and install the ENCODE hg38 reference with the f
 ```bash  
 conda activate encode-atac-seq-pipeline
 outdir=/path/to/reference/genome/hg38
-bash ~/ATAC_PIPELINE/atac-seq-pipeline/scripts/download_genome_data.s hg38 ${outdir}  
+bash ~/ATAC_PIPELINE/atac-seq-pipeline/scripts/download_genome_data.sh hg38 ${outdir}  
 ```
     
 #### 2.5.2 Install the custom rn6 genome database 
@@ -224,20 +231,13 @@ elif [[ "${GENOME}" == "motrpac_rn6" ]]; then
   BLACKLIST=
 ```
 
-The current version of the pipeline (1.5.4) also has some `tar` parameters that are not compatible with some OSs: `--sort=name --owner=root:0 --group=root:0 --mtime="UTC 2019-01-01"`. Run the following command to remove these parameters before running the script:
-
-```bash
-sed -i "s/--sort=name --owner.*//" ~/ATAC_PIPELINE/atac-seq-pipeline/scripts/build_genome_data.sh
-```
-
 Now run the script to build the custom genome database. Specify a destination directory and install the MoTrPAC rn6 reference with the following command. We recommend not to run this installer on a login node of your cluster. It will take >8GB memory and >2h time. 
 ```bash
 conda activate encode-atac-seq-pipeline
 outdir=/path/to/reference/genome/motrpac_rn6
 bash ~/ATAC_PIPELINE/atac-seq-pipeline/scripts/build_genome_data.sh motrpac_rn6 ${outdir}
 ```
-**Note: If you get a `Could not localize` error when running the pipeline, try gunzipping (i.e. `gunzip *tar.gz`) the `${outdir}/bowtie2_index/*.tar.gz` files. This is a bug that needs to be fixed.**  
-    
+  
 ## 3. Run the ENCODE ATAC-seq pipeline  
 MoTrPAC will run the ENCODE pipeline both with singletons for human samples and replicates for rat samples. In both cases, many iterations of the pipeline will need to be run for each batch of sequencing data. This repository provides scripts to automate this process, for both rat and human samples. 
 
@@ -256,16 +256,13 @@ Actually running the pipeline is straightforward. However, the command is differ
 
 An `atac` directory containing all of the pipeline outputs is created in the output directory (note the default output directory is the current working directory). One arbitrarily-named subdirectory for each config file (assuming the command is run in a loop for several samples) is written in `atac`.  
 
-Here is an example of code that submits a batch of pipelines to the Stanford SCG job queue:
+Here is an example of code that submits a batch of pipelines to the Stanford SCG job queue. `${JSON_DIR}` is the path to all of the config files, generated in [Step 3.1](#31-generate-configuration-files):  
 ```bash
-module load miniconda/3
 conda activate encode-atac-seq-pipeline
 
 ATACSRC=~/ATAC_PIPELINE/atac-seq-pipeline
 OUTDIR=/path/to/output/directory
 cd ${OUTDIR}
-
-# JSON_DIR is the path to all of the config files, generated in Step 4.1
 
 for json in $(ls ${JSON_DIR}); do 
   
@@ -273,17 +270,14 @@ for json in $(ls ${JSON_DIR}); do
   JOB_NAME=$(basename ${INPUT_JSON} | sed "s/\.json.*//")
 
   sbatch -A ${ACCOUNT} -J ${JOB_NAME} --export=ALL --mem 2G -t 4-0 --wrap "caper run ${ATACSRC}/atac.wdl -i ${INPUT_JSON}"
-  sleep 30
 done
 ```
-Note that for v1.5.3, the `sleep 30` command in between pipeline initializations is required to avoid an error. Run this in a screen session if you are initiating many pipelines in parallel.  
 
 ## 4. Organize outputs
 
 ### 4.1 Collect important outputs with `Croo`
 `Croo` is a tool ENCODE developed to simplify the pipeline outputs. It was installed along with the `Conda` environment. Run it on each sample in the batch. See **Table 4.1** for a description of outputs generated by this process. 
 ```
-module load miniconda/3
 conda activate encode-atac-seq-pipeline
 
 cd ${OUTDIR}/atac
@@ -313,7 +307,7 @@ done
 [ENCODE recommends](https://www.encodeproject.org/atac-seq/) using the `overlap` peak sets when one prefers a low false negative rate but potentially higher false positives; they recommend using the `IDR` peaks when one prefers low false positive rates.
     
 ### 4.2 Generate a spreadsheet of QC metrics for all samples with `qc2tsv`
-This is most useful if you ran the pipeline for multiple samples. **Step 4.1** generates a `qc/qc.json` file for each pipeline run. After installing `qc2tsv` (`pip install qc2tsv`), run the following command to compile a spreadsheet with QC from all samples: 
+This is most useful if you ran the pipeline for multiple samples. **Step 4.1** generates a `qc/qc.json` file for each pipeline run. After installing `qc2tsv` within the `encode-atac-seq-pipeline` Conda environment (`pip install qc2tsv`), run the following command to compile a spreadsheet with QC from all samples: 
 ```
 cd ${outdir}/atac
 qc2tsv $(find -path "*/qc/qc.json") --collapse-header > spreadsheet.tsv
