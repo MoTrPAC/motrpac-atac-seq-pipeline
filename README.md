@@ -75,7 +75,7 @@ Prepare a sample sheet for demultiplexing. Find an example [here](examples/Sampl
 
 [src/bcl2fastq.sh](src/bcl2fastq.sh) provides code both to run `bcl2fastq` and rename files. It can be run as follows:  
 1. Define the following paths:
-  - `bclfolder`: Path to sequencing output directory, e.g `181205_NB551514_0071_AHFHLGAFXY`
+  - `bclfolder`: Path to sequencing output directory, e.g `/lab/data/NOVASEQ_BATCH1/181205_NB551514_0071_AHFHLGAFXY`
   - `samplesheet`: Path to the sample sheet, e.g. `${bclfolder}/SampleSheet.csv`
   - `outdir`: Path to root output folder, e.g. `/lab/data/NOVASEQ_BATCH1`
 2. If applicable, load the correct version of `bcl2fastq`. For example, on Stanford SCG, run `module load bcl2fastq2/2.20.0.422`.  
