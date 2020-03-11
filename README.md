@@ -360,4 +360,4 @@ The following metrics are not strictly exclusion criteria for MoTrPAC samples, b
 |Number of peaks in `overlap` peak set < 80,000|replication.reproducibility.overlap.N_opt < 80000|This is more relaxed than the ENCODE recommendation|
 |A nucleosome-free region is not present| align.frag_len_stat.nfr_peak_exists == false|This should be enforced more strictly|
 |A mononucleosome peak is not present|align.frag_len_stat.mono_nuc_peak_exists == false|This should be enforced more strictly|
-|TSS enrichment < ?|align_enrich.tss_enrich.tss_enrich|This cutoff needs to be evaluated retrospectively |
+|TSS enrichment < ?|align_enrich.tss_enrich.tss_enrich|This cutoff needs to be evaluated retrospectively. We will probably have tissue-specific recommendations |
