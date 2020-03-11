@@ -1,7 +1,5 @@
 # MoTrPAC ATAC-Seq QC and Analysis Pipeline 
 
-## Please refer to branch update_1.7.0 until it is merged with master https://github.com/MoTrPAC/motrpac-atac-seq-pipeline/tree/update_v1.7.0
-
 This repository provides MoTrPAC-specific supplements to the [ENCODE ATAC-seq pipeline](https://github.com/ENCODE-DCC/atac-seq-pipeline). For additional details not directly related to running the ENCODE ATAC-seq pipeline or processing the results, see the most recent version of the MoTrPAC ATAC-seq QC and Analysis Pipeline MOP, available [here](https://docs.google.com/document/d/1vnB7ITAKnaZYc3v_FCdaDu3z-JXeDncRk5GnqzQVwRw/edit#heading=h.tjbixx8yyd33). 
 
 This documentation is intended to help individuals who are preparing ATAC-seq data for submission to the BIC or processing pilot samples with the full pipeline. For simplicity, this documentation explains how to run the full pipeline on a computer compatible with `Conda` environments. Users working on the cloud or in other environments can follow ENCODE's documentation as necessary. Post-processing scripts are intended to be useful to all users, regardless of environment. 
