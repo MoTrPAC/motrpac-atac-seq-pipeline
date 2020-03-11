@@ -335,7 +335,7 @@ qc2tsv $(find -path "*/qc/qc.json") --collapse-header > spreadsheet.tsv
 | align.dup.pct_duplicate_reads |Fraction (not percent) of read pairs that are duplicates **after** filtering alignments for quality|
 | align.frac_mito.frac_mito_reads | Fraction of reads that align to chrM **after** filtering alignments for quality and removing duplicates | 
 | align.nodup_samstat.total_reads | Number of alignments* after applying all filters |
-| align.frag_len_stat.frac_reads_in_nfr | Fraction of reads in nucleosome-free-region. Should be a value between {} and {} |
+| align.frag_len_stat.frac_reads_in_nfr | Fraction of reads in nucleosome-free-region. Should be a value greater than 0.4 |
 | align.frag_len_stat.nfr_over_mono_nuc_reads | Reads in nucleosome-free-region versus reads in mononucleosomal peak. Should be a value greater than 2.5 |
 | align.frag_len_stat.nfr_peak_exists | Does a nucleosome-free-peak exist? Should be `true` |
 | align.frag_len_stat.mono_nuc_peak_exists | Does a mononucleosomal-peak exist? Should be `true` |
@@ -343,7 +343,7 @@ qc2tsv $(find -path "*/qc/qc.json") --collapse-header > spreadsheet.tsv
 | lib_complexity.lib_complexity.NRF | Non-reduandant fraction. Measure of library complexity, i.e. degree of duplicates. Ideally >0.9 |
 | lib_complexity.lib_complexity.PBC1 | PCR bottlenecking coefficient 1. Measure of library complexity. Ideally >0.9 |
 | lib_complexity.lib_complexity.PBC2 | PCR bottlenecking coefficient 2. Measure of library complexity. Ideally >3 |
-| align_enrich.tss_enrich.tss_enrich **this needs to be checked** | TSS enrichment |
+| align_enrich.tss_enrich.tss_enrich | TSS enrichment |
 
 *Note: Alignments are per read, so for PE reads, there are two alignments per fragment if each PE read aligns once. 
 
@@ -354,10 +354,10 @@ The following metrics are not strictly exclusion criteria for MoTrPAC samples, b
 
 | Description | In terms of Table 2 metrics | Comments |
 |-------------|-------------------------------|----------|
-|< 50 million filtered, non-duplicated, non-mitochondrial paired-end reads in the filtered BAM file (i.e. 25M pairs)| align:nodup_samstat:total_reads < 50M | This is the most stringent criterion and may be relaxed |
-|Alignment rate < 80%| align:samstat:pct_mapped_reads < 80%||
-|Fraction of reads in `overlap` peaks < 0.1|peak_enrich:frac_reads_in_peaks:overlap:{max} < 0.1|This is more relaxed than the ENCODE recommendation|
-|Number of peaks in `overlap` peak set < 80,000|replication:reproducibility:overlap:N_opt < 80000|This is more relaxed than the ENCODE recommendation|
-|A nucleosome-free region is not present| align:frag_len_stat:nfr_peak_exists == false|This should be enforced more strictly|
-|A mononucleosome peak is not present|align:frag_len_stat:mono_nuc_peak_exists == false|This should be enforced more strictly|
-|TSS enrichment < ?|align_enrich:tss_enrich|This cutoff needs to be evaluated retrospectively |
+|< 50 million filtered, non-duplicated, non-mitochondrial paired-end reads in the filtered BAM file (i.e. 25M pairs)| align.nodup_samstat.total_reads < 50M | This is the most stringent criterion and may be relaxed |
+|Alignment rate < 80%| align.samstat.pct_mapped_reads < 80%||
+|Fraction of reads in `overlap` peaks < 0.1| peak_enrich.frac_reads_in_peaks.overlap.{opt_set}.frip < 0.1|This is more relaxed than the ENCODE recommendation. Note that replicate-level FRiP in raw peaks can be assessed with peak_enrich.frac_reads_in_peaks.macs2.frip |
+|Number of peaks in `overlap` peak set < 80,000|replication.reproducibility.overlap.N_opt < 80000|This is more relaxed than the ENCODE recommendation|
+|A nucleosome-free region is not present| align.frag_len_stat.nfr_peak_exists == false|This should be enforced more strictly|
+|A mononucleosome peak is not present|align.frag_len_stat.mono_nuc_peak_exists == false|This should be enforced more strictly|
+|TSS enrichment < ?|align_enrich.tss_enrich.tss_enrich|This cutoff needs to be evaluated retrospectively |
