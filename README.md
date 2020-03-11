@@ -4,7 +4,9 @@
 
 This repository provides MoTrPAC-specific supplements to the [ENCODE ATAC-seq pipeline](https://github.com/ENCODE-DCC/atac-seq-pipeline). For additional details not directly related to running the ENCODE ATAC-seq pipeline or processing the results, see the most recent version of the MoTrPAC ATAC-seq QC and Analysis Pipeline MOP, available [here](https://docs.google.com/document/d/1vnB7ITAKnaZYc3v_FCdaDu3z-JXeDncRk5GnqzQVwRw/edit#heading=h.tjbixx8yyd33). 
 
-This documentation is intended to help individuals who are preparing ATAC-seq data for submission to the BIC or processing pilot samples with the full pipeline. For simplicity, this documentation explains how to run the full pipeline on a computer compatible with Conda environments. Users working on the cloud or in other environments can follow ENCODE's documentation as necessary. Post-processing scripts are intended to be useful to all users, regardless of environment. 
+This documentation is intended to help individuals who are preparing ATAC-seq data for submission to the BIC or processing pilot samples with the full pipeline. For simplicity, this documentation explains how to run the full pipeline on a computer compatible with `Conda` environments. Users working on the cloud or in other environments can follow ENCODE's documentation as necessary. Post-processing scripts are intended to be useful to all users, regardless of environment. 
+
+**NOTE:** MoTrPAC uses ENCODE ATAC-seq pipeline version 1.7.0 for consistency within the consortium and reproducibilty outside of the consortium.  
 
 ### Important references:
 - GitHub repository for the ENCODE ATAC-seq pipeline: https://github.com/ENCODE-DCC/atac-seq-pipeline
@@ -75,7 +77,7 @@ Prepare a sample sheet for demultiplexing. Find an example [here](examples/Sampl
 
 [src/bcl2fastq.sh](src/bcl2fastq.sh) provides code both to run `bcl2fastq` and rename files. It can be run as follows:  
 1. Define the following paths:
-  - `bclfolder`: Path to sequencing output directory, e.g `181205_NB551514_0071_AHFHLGAFXY`
+  - `bclfolder`: Path to sequencing output directory, e.g `/lab/data/NOVASEQ_BATCH1/181205_NB551514_0071_AHFHLGAFXY`
   - `samplesheet`: Path to the sample sheet, e.g. `${bclfolder}/SampleSheet.csv`
   - `outdir`: Path to root output folder, e.g. `/lab/data/NOVASEQ_BATCH1`
 2. If applicable, load the correct version of `bcl2fastq`. For example, on Stanford SCG, run `module load bcl2fastq2/2.20.0.422`.  
@@ -117,25 +119,18 @@ The ENCODE pipeline supports many cloud platforms and cluster engines. It also s
 While the BIC runs this pipeline on Google Cloud Platform, this documentation is tailored for consortium users who use non-cloud computing environments, including clusters and personal computers. Therefore, this documentation describes the `Conda` implementation. Refer to ENCODE's documentation for alternatives. 
 
 ### 2.1 Clone the ENCODE repository
-Clone the v1.5.4 ENCODE repository and this repository in a folder in your home directory:
+Clone the v1.7.0 ENCODE repository and this repository in a folder in your home directory:
 ```bash
 cd ~/ATAC_PIPELINE
-git clone --single-branch --branch v1.5.4 https://github.com/ENCODE-DCC/atac-seq-pipeline.git
+git clone --single-branch --branch v1.7.0 https://github.com/ENCODE-DCC/atac-seq-pipeline.git
 ```
 
 ### 2.2 Install the `Conda` environment with all software dependencies  
-1. Install `conda` by following [these instructions](https://github.com/ENCODE-DCC/atac-seq-pipeline/blob/master/docs/install_conda.md).  
-2. Start a `screen` session. 
-3. Uninstall and install the ENCODE ATAC-seq `Conda` environment:
-```bash
-bash ~/ATAC_PIPELINE/atac-seq-pipeline/scripts/uninstall_conda_env.sh
-bash ~/ATAC_PIPELINE/atac-seq-pipeline/scripts/install_conda_env.sh
-```
+Install `conda` by following [these instructions](https://github.com/ENCODE-DCC/atac-seq-pipeline/blob/master/docs/install_conda.md). Perform Step 5 in a `screen` or `tmux` session, as it can take some time.   
 
 ### 2.3 Initialize `Caper`
 Installing the `Conda` environment also installs `Caper`. Make sure it works:
 ```bash
-# load/activate conda or miniconda module, if necessary
 conda activate encode-atac-seq-pipeline
 caper
 ```
@@ -173,7 +168,13 @@ aws-batch-arn | ARN for AWS Batch.
 aws-region | AWS region (e.g. us-west-1)
 out-s3-bucket | Output bucket path for AWS. This should start with `s3://`.
 gcp-prj | Google Cloud Platform Project
-out-gcs-bucket | Output bucket path for Google Cloud Platform. This should start with `gs://`.
+out-gcs-bucket | Output bucket path for Google Cloud Platform. This should start with `gs://`.  
+
+An important optional parameter is `db`. If you would like to enable call-catching (i.e. re-use ouputs from previous workflows, which is particularly useful if a workflow fails halfway through a pipeline), add the following lines to `~/.caper/default.conf`:  
+```
+db=file
+java-heap-run=4G
+```
 
 ### 2.4 Run a test sample 
 Follow [these platform-specific instructions](https://github.com/ENCODE-DCC/caper/blob/master/README.md#activating-conda-environment) to run a test sample. Use the following variable assignments:
@@ -181,6 +182,14 @@ Follow [these platform-specific instructions](https://github.com/ENCODE-DCC/cape
 PIPELINE_CONDA_ENV=encode-atac-seq-pipeline
 WDL=~/ATAC_PIPELINE/atac-seq-pipeline/atac.wdl
 INPUT_JSON=https://storage.googleapis.com/encode-pipeline-test-samples/encode-atac-seq-pipeline/ENCSR356KRQ_subsampled_caper.json
+```  
+Note that `Caper` writes all outputs to the current working directory, so first `cd` to the desired output directory before using `caper run` or `caper server`.   
+
+Here is an example of how the test workflow is run on Stanford SCG (SLURM):  
+```
+conda activate ${PIPELINE_CONDA_ENV}
+JOB_NAME=encode_test
+sbatch -A ${ACCOUNT} -J ${JOB_NAME} --export=ALL --mem 2G -t 4-0 --wrap "caper run ${WDL} -i ${INPUT_JSON}"
 ```
 
 ### 2.5 Install genome databases
@@ -190,7 +199,7 @@ Specify a destination directory and install the ENCODE hg38 reference with the f
 ```bash  
 conda activate encode-atac-seq-pipeline
 outdir=/path/to/reference/genome/hg38
-bash ~/ATAC_PIPELINE/atac-seq-pipeline/scripts/download_genome_data.s hg38 ${outdir}  
+bash ~/ATAC_PIPELINE/atac-seq-pipeline/scripts/download_genome_data.sh hg38 ${outdir}  
 ```
     
 #### 2.5.2 Install the custom rn6 genome database 
@@ -226,20 +235,13 @@ elif [[ "${GENOME}" == "motrpac_rn6" ]]; then
   BLACKLIST=
 ```
 
-The current version of the pipeline (1.5.4) also has some `tar` parameters that are not compatible with some OSs: `--sort=name --owner=root:0 --group=root:0 --mtime="UTC 2019-01-01"`. Run the following command to remove these parameters before running the script:
-
-```bash
-sed -i "s/--sort=name --owner.*//" ~/ATAC_PIPELINE/atac-seq-pipeline/scripts/build_genome_data.sh
-```
-
 Now run the script to build the custom genome database. Specify a destination directory and install the MoTrPAC rn6 reference with the following command. We recommend not to run this installer on a login node of your cluster. It will take >8GB memory and >2h time. 
 ```bash
 conda activate encode-atac-seq-pipeline
 outdir=/path/to/reference/genome/motrpac_rn6
 bash ~/ATAC_PIPELINE/atac-seq-pipeline/scripts/build_genome_data.sh motrpac_rn6 ${outdir}
 ```
-**Note: If you get a `Could not localize` error when running the pipeline, try gunzipping (i.e. `gunzip *tar.gz`) the `${outdir}/bowtie2_index/*.tar.gz` files. This is a bug that needs to be fixed.**  
-    
+  
 ## 3. Run the ENCODE ATAC-seq pipeline  
 MoTrPAC will run the ENCODE pipeline both with singletons for human samples and replicates for rat samples. In both cases, many iterations of the pipeline will need to be run for each batch of sequencing data. This repository provides scripts to automate this process, for both rat and human samples. 
 
@@ -258,16 +260,13 @@ Actually running the pipeline is straightforward. However, the command is differ
 
 An `atac` directory containing all of the pipeline outputs is created in the output directory (note the default output directory is the current working directory). One arbitrarily-named subdirectory for each config file (assuming the command is run in a loop for several samples) is written in `atac`.  
 
-Here is an example of code that submits a batch of pipelines to the Stanford SCG job queue:
+Here is an example of code that submits a batch of pipelines to the Stanford SCG job queue. `${JSON_DIR}` is the path to all of the config files, generated in [Step 3.1](#31-generate-configuration-files):  
 ```bash
-module load miniconda/3
 conda activate encode-atac-seq-pipeline
 
 ATACSRC=~/ATAC_PIPELINE/atac-seq-pipeline
 OUTDIR=/path/to/output/directory
 cd ${OUTDIR}
-
-# JSON_DIR is the path to all of the config files, generated in Step 4.1
 
 for json in $(ls ${JSON_DIR}); do 
   
@@ -275,17 +274,14 @@ for json in $(ls ${JSON_DIR}); do
   JOB_NAME=$(basename ${INPUT_JSON} | sed "s/\.json.*//")
 
   sbatch -A ${ACCOUNT} -J ${JOB_NAME} --export=ALL --mem 2G -t 4-0 --wrap "caper run ${ATACSRC}/atac.wdl -i ${INPUT_JSON}"
-  sleep 30
 done
 ```
-Note that for v1.5.3, the `sleep 30` command in between pipeline initializations is required to avoid an error. Run this in a screen session if you are initiating many pipelines in parallel.  
 
 ## 4. Organize outputs
 
 ### 4.1 Collect important outputs with `Croo`
 `Croo` is a tool ENCODE developed to simplify the pipeline outputs. It was installed along with the `Conda` environment. Run it on each sample in the batch. See **Table 4.1** for a description of outputs generated by this process. 
 ```
-module load miniconda/3
 conda activate encode-atac-seq-pipeline
 
 cd ${OUTDIR}/atac
@@ -310,12 +306,12 @@ done
 | `peak/overlap_reproducibility/ overlap.optimal_peak.narrowPeak.hammock.gz` | Hammock file of `overlap` peaks, optimized for viewing peaks in a genome browser |
 | `peak/overlap_reproducibility/ overlap.optimal_peak.narrowPeak.gz` | BED file of `overlap` peaks. **Generally, use this as your final peak set** |
 | `peak/overlap_reproducibility/ overlap.optimal_peak.narrowPeak.bb` | [bigBed](https://genome.ucsc.edu/goldenPath/help/bigBed.html) file of `overlap` peaks  useful for visualizing peaks in a genome browser |
-| `peak/idr.optimal_peak.narrowPeak.gz` | `IDR` peaks. More conservative than `overlap` peaks |
+| `peak/idr_reproducibility/ idr.optimal_peak.narrowPeak.gz` | `IDR` peaks. More conservative than `overlap` peaks |
 
 [ENCODE recommends](https://www.encodeproject.org/atac-seq/) using the `overlap` peak sets when one prefers a low false negative rate but potentially higher false positives; they recommend using the `IDR` peaks when one prefers low false positive rates.
     
 ### 4.2 Generate a spreadsheet of QC metrics for all samples with `qc2tsv`
-This is most useful if you ran the pipeline for multiple samples. **Step 4.1** generates a `qc/qc.json` file for each pipeline run. After installing `qc2tsv` (`pip install qc2tsv`), run the following command to compile a spreadsheet with QC from all samples: 
+This is most useful if you ran the pipeline for multiple samples. **Step 4.1** generates a `qc/qc.json` file for each pipeline run. After installing `qc2tsv` within the `encode-atac-seq-pipeline` `Conda` environment (`pip install qc2tsv`), run the following command to compile a spreadsheet with QC from all samples: 
 ```
 cd ${outdir}/atac
 qc2tsv $(find -path "*/qc/qc.json") --collapse-header > spreadsheet.tsv
@@ -325,27 +321,31 @@ qc2tsv $(find -path "*/qc/qc.json") --collapse-header > spreadsheet.tsv
 
 **Table 4.2. Description of relevant QC metrics.**
 
-| Header:subheader | Metric | Definition/Notes |
-|--------|--------|------------------|
-| align:samstat | total_reads | Total number of alignments* (including multimappers)|
-| align:samstat | pct_mapped_reads | Percent of reads that mapped|
-| align:samstat| pct_properly_paired_reads |Percent of reads that are properly paired|
-| align:dup | pct_duplicate_reads |Fraction (not percent) of read pairs that are duplicates **after** filtering alignments for quality|
-| align:frac_mito | frac_mito_reads | Fraction of reads that align to chrM **after** filtering alignments for quality and removing duplicates | 
-| align:nodup_samstat | total_reads | Number of alignments* after applying all filters |
-| align:frag_len_stat | frac_reads_in_nfr | Fraction of reads in nucleosome-free-region. Should be a value between {} and {} |
-| align:frag_len_stat | nfr_over_mono_nuc_reads | Reads in nucleosome-free-region versus reads in mononucleosomal peak. Should be a value greater than 2.5 |
-| align:frag_len_stat | nfr_peak_exists | Does a nucleosome-free-peak exist? Should be `true` |
-| align:frag_len_stat | mono_nuc_peak_exists | Does a mononucleosomal-peak exist? Should be `true` |
-| align:frag_len_stat | di_nuc_peak_exists | Does a dinucleosomal-peak exist? Ideally `true`, but not condemnable if `false` |
-| lib_complexity | NRF | Non-reduandant fraction. Measure of library complexity, i.e. degree of duplicates. Ideally >0.9 |
-| lib_complexity | PBC1 | PCR bottlenecking coefficient 1. Measure of library complexity. Ideally >0.9 |
-| lib_complexity | PBC2 | PCR bottlenecking coefficient 2. Measure of library complexity. Ideally >3 |
-| replication:reproducibility:overlap | N_opt | Number of `overlap` peaks |
-| replication:reproducibility:idr | N_opt | Number of `IDR` peaks |
-| peak_enrich:frac_reads_in_peaks:overlap | * | Fraction of reads in `overlap` peaks | 
-| peak_enrich:frac_reads_in_peaks:idr | * | Fraction of reads in `IDR` peaks |
-| align_enrich:tss_enrich | tss_enrich | TSS enrichment |
+| Metric | Definition/Notes |
+|--------|------------------|
+| replication.reproducibility.overlap.N_opt | Number of optimal overlap_reproducibility peaks |
+| replication.reproducibility.overlap.opt_set | Peak set corresponding to optimal overlap_reproducibility peaks |
+| replication.reproducibility.idr.N_opt | Number of optimal idr_reproducibility peaks | 
+| replication.reproducibility.idr.opt_set | Peak set corresponding to optimal idr_reproducibility peaks |
+| replication.num_peaks.num_peaks | Number of peaks called in each replicate | 
+| peak_enrich.frac_reads_in_peaks.macs2.frip | Replicate-level FRiP in raw MACS2 peaks | 
+| peak_enrich.frac_reads_in_peaks.overlap.{opt_set}.frip | Many FRiP values are reported. In order to get the FRiP corresponding to the overlap_reproducibility peak set, you need to cross-reference the `replication.reproducibility.overlap.opt_set` metric with these column names to extract the appropriate FRiP. For example, if `replication.reproducibility.overlap.opt_set` is `pooled-pr1_vs_pooled-pr2`, then you need to extract the FRiP value from the `peak_enrich.frac_reads_in_peaks.overlap.pooled-pr1_vs_pooled-pr2.frip` column. See **insert script name** to see how to do this in an automated way |
+| peak_enrich.frac_reads_in_peaks.idr.{opt_set}.frip | Cross-reference with `replication.reproducibility.idr.opt_set`. See `peak_enrich.frac_reads_in_peaks.overlap.{opt_set}.frip` |
+| align.samstat.total_reads | Total number of alignments* (including multimappers)|
+| align.samstat.pct_mapped_reads | Percent of reads that mapped|
+| align.samstat.pct_properly_paired_reads |Percent of reads that are properly paired|
+| align.dup.pct_duplicate_reads |Fraction (not percent) of read pairs that are duplicates **after** filtering alignments for quality|
+| align.frac_mito.frac_mito_reads | Fraction of reads that align to chrM **after** filtering alignments for quality and removing duplicates | 
+| align.nodup_samstat.total_reads | Number of alignments* after applying all filters |
+| align.frag_len_stat.frac_reads_in_nfr | Fraction of reads in nucleosome-free-region. Should be a value greater than 0.4 |
+| align.frag_len_stat.nfr_over_mono_nuc_reads | Reads in nucleosome-free-region versus reads in mononucleosomal peak. Should be a value greater than 2.5 |
+| align.frag_len_stat.nfr_peak_exists | Does a nucleosome-free-peak exist? Should be `true` |
+| align.frag_len_stat.mono_nuc_peak_exists | Does a mononucleosomal-peak exist? Should be `true` |
+| align.frag_len_stat.di_nuc_peak_exists | Does a dinucleosomal-peak exist? Ideally `true`, but not condemnable if `false` |
+| lib_complexity.lib_complexity.NRF | Non-reduandant fraction. Measure of library complexity, i.e. degree of duplicates. Ideally >0.9 |
+| lib_complexity.lib_complexity.PBC1 | PCR bottlenecking coefficient 1. Measure of library complexity. Ideally >0.9 |
+| lib_complexity.lib_complexity.PBC2 | PCR bottlenecking coefficient 2. Measure of library complexity. Ideally >3 |
+| align_enrich.tss_enrich.tss_enrich | TSS enrichment |
 
 *Note: Alignments are per read, so for PE reads, there are two alignments per fragment if each PE read aligns once. 
 
@@ -356,10 +356,10 @@ The following metrics are not strictly exclusion criteria for MoTrPAC samples, b
 
 | Description | In terms of Table 2 metrics | Comments |
 |-------------|-------------------------------|----------|
-|< 50 million filtered, non-duplicated, non-mitochondrial paired-end reads in the filtered BAM file (i.e. 25M pairs)| align:nodup_samstat:total_reads < 50M | This is the most stringent criterion and may be relaxed |
-|Alignment rate < 80%| align:samstat:pct_mapped_reads < 80%||
-|Fraction of reads in `overlap` peaks < 0.1|peak_enrich:frac_reads_in_peaks:overlap:{max} < 0.1|This is more relaxed than the ENCODE recommendation|
-|Number of peaks in `overlap` peak set < 80,000|replication:reproducibility:overlap:N_opt < 80000|This is more relaxed than the ENCODE recommendation|
-|A nucleosome-free region is not present| align:frag_len_stat:nfr_peak_exists == false|This should be enforced more strictly|
-|A mononucleosome peak is not present|align:frag_len_stat:mono_nuc_peak_exists == false|This should be enforced more strictly|
-|TSS enrichment < ?|align_enrich:tss_enrich|This cutoff needs to be evaluated retrospectively |
+|< 50 million filtered, non-duplicated, non-mitochondrial paired-end reads in the filtered BAM file (i.e. 25M pairs)| align.nodup_samstat.total_reads < 50M | This is the most stringent criterion and may be relaxed |
+|Alignment rate < 80%| align.samstat.pct_mapped_reads < 80%||
+|Fraction of reads in `overlap` peaks < 0.1| peak_enrich.frac_reads_in_peaks.overlap.{opt_set}.frip < 0.1|This is more relaxed than the ENCODE recommendation. Note that replicate-level FRiP in raw peaks can be assessed with peak_enrich.frac_reads_in_peaks.macs2.frip |
+|Number of peaks in `overlap` peak set < 80,000|replication.reproducibility.overlap.N_opt < 80000|This is more relaxed than the ENCODE recommendation|
+|A nucleosome-free region is not present| align.frag_len_stat.nfr_peak_exists == false|This should be enforced more strictly|
+|A mononucleosome peak is not present|align.frag_len_stat.mono_nuc_peak_exists == false|This should be enforced more strictly|
+|TSS enrichment < ?|align_enrich.tss_enrich.tss_enrich|This cutoff needs to be evaluated retrospectively. We will probably have tissue-specific recommendations |
