@@ -304,7 +304,7 @@ done
 | `peak/overlap_reproducibility/ overlap.optimal_peak.narrowPeak.hammock.gz` | Hammock file of `overlap` peaks, optimized for viewing peaks in a genome browser |
 | `peak/overlap_reproducibility/ overlap.optimal_peak.narrowPeak.gz` | BED file of `overlap` peaks. **Generally, use this as your final peak set** |
 | `peak/overlap_reproducibility/ overlap.optimal_peak.narrowPeak.bb` | [bigBed](https://genome.ucsc.edu/goldenPath/help/bigBed.html) file of `overlap` peaks  useful for visualizing peaks in a genome browser |
-| `peak/idr.optimal_peak.narrowPeak.gz` | `IDR` peaks. More conservative than `overlap` peaks |
+| `peak/idr_reproducibility/ idr.optimal_peak.narrowPeak.gz` | `IDR` peaks. More conservative than `overlap` peaks |
 
 [ENCODE recommends](https://www.encodeproject.org/atac-seq/) using the `overlap` peak sets when one prefers a low false negative rate but potentially higher false positives; they recommend using the `IDR` peaks when one prefers low false positive rates.
     
