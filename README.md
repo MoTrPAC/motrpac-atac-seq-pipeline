@@ -319,27 +319,31 @@ qc2tsv $(find -path "*/qc/qc.json") --collapse-header > spreadsheet.tsv
 
 **Table 4.2. Description of relevant QC metrics.**
 
-| Header:subheader | Metric | Definition/Notes |
-|--------|--------|------------------|
-| align:samstat | total_reads | Total number of alignments* (including multimappers)|
-| align:samstat | pct_mapped_reads | Percent of reads that mapped|
-| align:samstat| pct_properly_paired_reads |Percent of reads that are properly paired|
-| align:dup | pct_duplicate_reads |Fraction (not percent) of read pairs that are duplicates **after** filtering alignments for quality|
-| align:frac_mito | frac_mito_reads | Fraction of reads that align to chrM **after** filtering alignments for quality and removing duplicates | 
-| align:nodup_samstat | total_reads | Number of alignments* after applying all filters |
-| align:frag_len_stat | frac_reads_in_nfr | Fraction of reads in nucleosome-free-region. Should be a value between {} and {} |
-| align:frag_len_stat | nfr_over_mono_nuc_reads | Reads in nucleosome-free-region versus reads in mononucleosomal peak. Should be a value greater than 2.5 |
-| align:frag_len_stat | nfr_peak_exists | Does a nucleosome-free-peak exist? Should be `true` |
-| align:frag_len_stat | mono_nuc_peak_exists | Does a mononucleosomal-peak exist? Should be `true` |
-| align:frag_len_stat | di_nuc_peak_exists | Does a dinucleosomal-peak exist? Ideally `true`, but not condemnable if `false` |
-| lib_complexity | NRF | Non-reduandant fraction. Measure of library complexity, i.e. degree of duplicates. Ideally >0.9 |
-| lib_complexity | PBC1 | PCR bottlenecking coefficient 1. Measure of library complexity. Ideally >0.9 |
-| lib_complexity | PBC2 | PCR bottlenecking coefficient 2. Measure of library complexity. Ideally >3 |
-| replication:reproducibility:overlap | N_opt | Number of `overlap` peaks |
-| replication:reproducibility:idr | N_opt | Number of `IDR` peaks |
-| peak_enrich:frac_reads_in_peaks:overlap | * | Fraction of reads in `overlap` peaks | 
-| peak_enrich:frac_reads_in_peaks:idr | * | Fraction of reads in `IDR` peaks |
-| align_enrich:tss_enrich | tss_enrich | TSS enrichment |
+| Metric | Definition/Notes |
+|--------|------------------|
+| replication.reproducibility.overlap.N_opt | Number of optimal overlap_reproducibility peaks |
+| replication.reproducibility.overlap.opt_set | Peak set corresponding to optimal overlap_reproducibility peaks |
+| replication.reproducibility.idr.N_opt | Number of optimal idr_reproducibility peaks | 
+| replication.reproducibility.idr.opt_set | Peak set corresponding to optimal idr_reproducibility peaks |
+| replication.num_peaks.num_peaks | Number of peaks called in each replicate | 
+| peak_enrich.frac_reads_in_peaks.macs2.frip | Replicate-level FRiP in raw MACS2 peaks | 
+| peak_enrich.frac_reads_in_peaks.overlap.{opt_set}.frip | Many FRiP values are reported. In order to get the FRiP corresponding to the overlap_reproducibility peak set, you need to cross-reference the `replication.reproducibility.overlap.opt_set` metric with these column names to extract the appropriate FRiP. For example, if `replication.reproducibility.overlap.opt_set` is `pooled-pr1_vs_pooled-pr2`, then you need to extract the FRiP value from the `peak_enrich.frac_reads_in_peaks.overlap.pooled-pr1_vs_pooled-pr2.frip` column. See **insert script name** to see how to do this in an automated way |
+| peak_enrich.frac_reads_in_peaks.idr.{opt_set}.frip | Cross-reference with `replication.reproducibility.idr.opt_set`. See `peak_enrich.frac_reads_in_peaks.overlap.{opt_set}.frip` |
+| align.samstat.total_reads | Total number of alignments* (including multimappers)|
+| align.samstat.pct_mapped_reads | Percent of reads that mapped|
+| align.samstat.pct_properly_paired_reads |Percent of reads that are properly paired|
+| align.dup.pct_duplicate_reads |Fraction (not percent) of read pairs that are duplicates **after** filtering alignments for quality|
+| align.frac_mito.frac_mito_reads | Fraction of reads that align to chrM **after** filtering alignments for quality and removing duplicates | 
+| align.nodup_samstat.total_reads | Number of alignments* after applying all filters |
+| align.frag_len_stat.frac_reads_in_nfr | Fraction of reads in nucleosome-free-region. Should be a value between {} and {} |
+| align.frag_len_stat.nfr_over_mono_nuc_reads | Reads in nucleosome-free-region versus reads in mononucleosomal peak. Should be a value greater than 2.5 |
+| align.frag_len_stat.nfr_peak_exists | Does a nucleosome-free-peak exist? Should be `true` |
+| align.frag_len_stat.mono_nuc_peak_exists | Does a mononucleosomal-peak exist? Should be `true` |
+| align.frag_len_stat.di_nuc_peak_exists | Does a dinucleosomal-peak exist? Ideally `true`, but not condemnable if `false` |
+| lib_complexity.lib_complexity.NRF | Non-reduandant fraction. Measure of library complexity, i.e. degree of duplicates. Ideally >0.9 |
+| lib_complexity.lib_complexity.PBC1 | PCR bottlenecking coefficient 1. Measure of library complexity. Ideally >0.9 |
+| lib_complexity.lib_complexity.PBC2 | PCR bottlenecking coefficient 2. Measure of library complexity. Ideally >3 |
+| align_enrich.tss_enrich.tss_enrich **this needs to be checked** | TSS enrichment |
 
 *Note: Alignments are per read, so for PE reads, there are two alignments per fragment if each PE read aligns once. 
 
