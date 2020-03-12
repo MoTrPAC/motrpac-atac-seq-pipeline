@@ -212,7 +212,12 @@ elif [[ "${GENOME}" == "YOUR_OWN_GENOME" ]]; then
   # so that b-filt peak file (.bfilt.*Peak.gz) will only have chromosomes matching with this pattern
   # this reg-ex will work even without a blacklist.
   # you will still be able to find a .bfilt. peak file
-  REGEX_BFILT_PEAK_CHR_NAME="chr[\dXY]+"
+  # use ".*", which means ALL CHARACTERS, if you want to keep all chromosomes
+  # use "chr[\dXY]+" to allow chr[NUMBERS], chrX and chrY only
+  # this is important to make your final output peak file (bigBed) work with genome browsers
+  REGEX_BFILT_PEAK_CHR_NAME=".*"
+  # REGEX_BFILT_PEAK_CHR_NAME="chr[\dXY]+"
+
   # mitochondrial chromosome name (e.g. chrM, MT)
   MITO_CHR_NAME="chrM"
   # URL for your reference FASTA (fasta, fasta.gz, fa, fa.gz, 2bit)
@@ -226,7 +231,7 @@ fi
 Above it, add this block:
 ```
 elif [[ "${GENOME}" == "motrpac_rn6" ]]; then
-  REGEX_BFILT_PEAK_CHR_NAME="chr[\dXY]+"
+  REGEX_BFILT_PEAK_CHR_NAME=".*"
   MITO_CHR_NAME="chrM"
   REF_FA="http://mitra.stanford.edu/montgomery/projects/motrpac/atac/SCG/motrpac_references/rn6_release96/Rattus_norvegicus.Rnor_6.0.dna.toplevel.standardized.fa.gz"
   TSS="http://mitra.stanford.edu/montgomery/projects/motrpac/atac/SCG/motrpac_references/rn6_release96/Rattus_norvegicus.Rnor_6.0.96_protein_coding.tss.bed.gz"
