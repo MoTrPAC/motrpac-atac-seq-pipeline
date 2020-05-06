@@ -24,7 +24,7 @@ This documentation is intended to help individuals who are preparing ATAC-seq da
     
     1.4 Submit data  
     
-    1.5 **For GET: Download pipeline outputs FROM BIC**
+    1.5 [**For GET: Download pipeline outputs FROM BIC**](#15-for-get-download-pipeline-outputs-from-bic)  
     
 2. [Install and test ENCODE ATAC-seq pipeline and dependencies](#2-install-and-test-encode-atac-seq-pipeline-and-dependencies)    
     
@@ -307,8 +307,7 @@ done
 
 | Subdirectory or file                      | Description                             |
 |-------------------------------------------|-----------------------------------------|
-| `qc/qc.json` | JSON of important QC metrics. Useful for making spreadsheets of QC metrics for multiple samples |
-| `qc/qc.html` | HTML report of important QC metrics. Includes QC metrics in `qc/qc.json` in addition to some plots |
+| `qc/*` | Components of the merged QC spreadhseet (see Step 4.2) | 
 | `signal/*/*fc.signal.bigwig` | MACS2 peak-calling signal (fold-change), useful for visualizing "read pileups" in a genome browser |
 | `signal/*/*pval.signal.bigwig` | MACS2 peak-calling signal (P-value), useful for visualizing "read pileups" in a genome browser. P-value track is more dramatic than the fold-change track |
 | `align/*/*.trim.merged.bam` | Unfiltered BAM files |
