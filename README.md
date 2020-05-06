@@ -112,7 +112,7 @@ Refer to the [GET CAS-to-BIC Data Transfer Guidelines](https://docs.google.com/d
 - `fastq_raw/*.fastq.gz`
 
 ### 1.5 For GET: Download pipeline outputs FROM BIC
-After the BIC has finished running the ENCODE ATAC-seq pipeline on a batch of submitted data, use [`pass_extract_atac_from_gcp.sh`](src/pass_extract_atac_from_gcp.sh) to download the important subset of outputs from GCP. Inside the script, change the `download_dir` `gsurl` paths to point to the source on gsutil and the local destination, respectively. Then run the script with the number of cores available for parallelization as an argument, e.g.:
+After the BIC has finished running the ENCODE ATAC-seq pipeline on a batch of submitted data, use [`pass_extract_atac_from_gcp.sh`](src/pass_extract_atac_from_gcp.sh) to download the important subset of outputs from GCP. Inside the script, change the `download_dir` and `gsurl` paths to point to the gsutil source and the local destination, respectively. Then run the script with the number of cores available for parallelization as an argument, e.g.:
 ```bash
 bash pass_extract_atac_from_gcp.sh 10
 ```
