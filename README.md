@@ -24,6 +24,8 @@ This documentation is intended to help individuals who are preparing ATAC-seq da
     
     1.4 Submit data  
     
+    1.5 **For GET: Download pipeline outputs FROM BIC**
+    
 2. [Install and test ENCODE ATAC-seq pipeline and dependencies](#2-install-and-test-encode-atac-seq-pipeline-and-dependencies)    
     
     2.1 Clone the ENCODE repository
@@ -108,6 +110,12 @@ Refer to the [GET CAS-to-BIC Data Transfer Guidelines](https://docs.google.com/d
 - `readme_YYYYMMDD.txt`
 - `laneBarcode.html`
 - `fastq_raw/*.fastq.gz`
+
+### 1.5 For GET: Download pipeline outputs FROM BIC
+After the BIC has finished running the ENCODE ATAC-seq pipeline on a batch of submitted data, use [`pass_extract_atac_from_gcp.sh`](src/pass_extract_atac_from_gcp.sh) to download the important subset of outputs from GCP. Inside the script, change the `download_dir` `gsurl` paths to point to the source on gsutil and the local destination, respectively. Then run the script with the number of cores available for parallelization as an argument, e.g.:
+```bash
+bash pass_extract_atac_from_gcp.sh 10
+```
 
 ## 2. Install and test ENCODE ATAC-seq pipeline and dependencies
 All steps in this section must only be performed once. After dependencies are installed and genome databases are built, skip to [here](#3-run-the-encode-atac-seq-pipeline).
