@@ -8,12 +8,12 @@
 
 #get a merged peak file       
 
-module load miniconda/3
+module load miniconda/3 # for python3
 module load bedtools
 
-indir=/projects/motrpac/PASS1A/ATAC/NOVASEQ_BATCH2/outputs
+indir=motrpac/PASS1A/ATAC/NOVASEQ_BATCH2/outputs
 outdir=${indir}/merged_peaks
-srcdir=/oak/stanford/groups/smontgom/nicolerg/src/MOTRPAC/ATAC/PASS
+srcdir=src/MOTRPAC/ATAC/PASS
 cores=10 # 25G per core. 10G was too low 
 
 mkdir -p ${outdir}
