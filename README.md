@@ -4,7 +4,7 @@ This repository provides MoTrPAC-specific supplements to the [ENCODE ATAC-seq pi
 
 This documentation is intended to help individuals who are preparing ATAC-seq data for submission to the BIC or processing pilot samples with the full pipeline. For simplicity, this documentation explains how to run the full pipeline on a computer compatible with `Conda` environments. Users working on the cloud or in other environments can follow ENCODE's documentation as necessary. Post-processing scripts are intended to be useful to all users, regardless of environment. 
 
-**NOTE:** MoTrPAC uses ENCODE ATAC-seq pipeline version 1.7.0 for consistency within the consortium and reproducibilty outside of the consortium.  
+>**NOTE:** MoTrPAC uses ENCODE ATAC-seq pipeline **version 1.7.0** for consistency within the consortium and reproducibilty outside of the consortium.  
 
 ### Important references:
 - GitHub repository for the ENCODE ATAC-seq pipeline: https://github.com/ENCODE-DCC/atac-seq-pipeline
@@ -23,6 +23,8 @@ This documentation is intended to help individuals who are preparing ATAC-seq da
     1.3 Collect additional documents  
     
     1.4 Submit data  
+    
+    1.5 [**For GET: Download pipeline outputs FROM BIC**](#15-for-get-download-pipeline-outputs-from-bic)  
     
 2. [Install and test ENCODE ATAC-seq pipeline and dependencies](#2-install-and-test-encode-atac-seq-pipeline-and-dependencies)    
     
@@ -108,6 +110,12 @@ Refer to the [GET CAS-to-BIC Data Transfer Guidelines](https://docs.google.com/d
 - `readme_YYYYMMDD.txt`
 - `laneBarcode.html`
 - `fastq_raw/*.fastq.gz`
+
+### 1.5 For GET: Download pipeline outputs FROM BIC
+After the BIC has finished running the ENCODE ATAC-seq pipeline on a batch of submitted data, use [`pass_extract_atac_from_gcp.sh`](src/pass_extract_atac_from_gcp.sh) to download the important subset of outputs from GCP. Inside the script, change the `download_dir` and `gsurl` paths to point to the gsutil source and the local destination, respectively. Then run the script with the number of cores available for parallelization as an argument, e.g.:
+```bash
+bash pass_extract_atac_from_gcp.sh 10
+```
 
 ## 2. Install and test ENCODE ATAC-seq pipeline and dependencies
 All steps in this section must only be performed once. After dependencies are installed and genome databases are built, skip to [here](#3-run-the-encode-atac-seq-pipeline).
@@ -299,8 +307,7 @@ done
 
 | Subdirectory or file                      | Description                             |
 |-------------------------------------------|-----------------------------------------|
-| `qc/qc.json` | JSON of important QC metrics. Useful for making spreadsheets of QC metrics for multiple samples |
-| `qc/qc.html` | HTML report of important QC metrics. Includes QC metrics in `qc/qc.json` in addition to some plots |
+| `qc/*` | Components of the merged QC spreadhseet (see Step 4.2) | 
 | `signal/*/*fc.signal.bigwig` | MACS2 peak-calling signal (fold-change), useful for visualizing "read pileups" in a genome browser |
 | `signal/*/*pval.signal.bigwig` | MACS2 peak-calling signal (P-value), useful for visualizing "read pileups" in a genome browser. P-value track is more dramatic than the fold-change track |
 | `align/*/*.trim.merged.bam` | Unfiltered BAM files |
