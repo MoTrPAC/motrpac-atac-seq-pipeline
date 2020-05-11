@@ -11,11 +11,15 @@
 module load miniconda/3 # for python3
 module load bedtools
 
-indir=motrpac/PASS1A/ATAC/NOVASEQ_BATCH2/outputs
-outdir=${indir}/merged_peaks
-srcdir=src/MOTRPAC/ATAC/PASS
-cores=10 # 25G per core. 10G was too low 
+############################################################
+## USER-DEFINED VARIABLES 
+indir=motrpac/PASS1A/ATAC/NOVASEQ_BATCH2/outputs # same as ${base} from running pass_extract_from_gcp.sh
+srcdir=motrpac-atac-seq-pipeline/src # directory with truncate_narrowpeak_200bp_summit.py
+cores=10 # number of cores allocated for parallelization 
+# need ~25G per core. 10G was too low 
+############################################################
 
+outdir=${indir}/merged_peaks 
 mkdir -p ${outdir}
 cd ${indir}
 
