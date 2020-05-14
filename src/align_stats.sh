@@ -53,4 +53,4 @@ parallel --verbose --jobs ${cores} align_stats ::: $(find -name "*_R1.trim.bam")
 
 # collapse
 head -1 $(find -name "*_chrinfo.csv" | head -1) > merged_chr_info.csv
-for file in $(find -name "*_chrinfo.csv"); do sed -e '1d' $file >> merged_chr_info.csv
+for file in $(find -name "*_chrinfo.csv"); do sed -e '1d' $file >> merged_chr_info.csv; done
