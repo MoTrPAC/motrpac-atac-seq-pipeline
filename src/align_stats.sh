@@ -1,19 +1,13 @@
 #!/bin/bash
-
-#SBATCH --job-name=bam_chrinfo
-#SBATCH --cpus-per-task=4
-#SBATCH --partition=interactive
-#SBATCH --account=default
-#SBATCH --time=5-00:00:00
-#SBATCH --mem-per-cpu=20G
-
 # Nicole Gay
 # 13 May 2020
 # ATAC-seq alignment stats
+# usage: bash align_stats.sh [NUM_CORES]
 
 set -e 
 
-cores=4
+cores=$1
+
 indir=/projects/motrpac/PASS1A/ATAC/NOVASEQ_BATCH2/outputs
 # path to ENCODE outputs, anywhere upstream of the bam files
 # also where output folder will be made
