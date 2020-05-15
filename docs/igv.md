@@ -7,7 +7,7 @@ Download the desktop app: http://software.broadinstitute.org/software/igv/
 ## Build a custom genome in IGV 
 
 ### Download reference files  
-All of the necessary files are available [here]. Download the following files and save them somewhere you will remember (all in the same folder).  
+All of the necessary files are available [here](http://mitra.stanford.edu/montgomery/projects/motrpac/atac/SCG/motrpac_references/rn6_release96/). Download the following files and save them somewhere you will remember (all in the same folder).  
 1. [FASTA file](http://mitra.stanford.edu/montgomery/projects/motrpac/atac/SCG/motrpac_references/rn6_release96/Rattus_norvegicus.Rnor_6.0.dna.toplevel.standardized.fa.gz) **- unzip after downloading**
 2. [Cytoband file](http://mitra.stanford.edu/montgomery/projects/motrpac/atac/SCG/motrpac_references/rn6_release96/cytoband.txt) 
 3. [Gene file](http://mitra.stanford.edu/montgomery/projects/motrpac/atac/SCG/motrpac_references/rn6_release96/Rattus_norvegicus.Rnor_6.0.96.standardized.gtf)
