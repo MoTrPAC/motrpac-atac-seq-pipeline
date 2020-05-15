@@ -380,4 +380,4 @@ The following metrics are not strictly exclusion criteria for MoTrPAC samples, b
 - [extract_rep_names_from_encode.sh](src/extract_rep_names_from_encode.sh): generate rep-to-viallabel map to interpret QC report   
 - [pass_extract_atac_from_gcp.sh](src/pass_extract_atac_from_gcp.sh): download relevant files from ENCODE output  
 - [encode_to_count_matrix.sh](src/encode_to_count_matrix.sh): use `narrowkpeak.gz` and `tagAlign` files to generate a peak x sample raw counts matrix  
-- [align_stats.sh](src/align_stats.sh): calculate % of primary alignments aligning to chrX, chrY, chrM, autosomes, and contigs  
+- [align_stats.sh](src/align_stats.sh): calculate % of primary alignments aligning to chrX, chrY, chrM, autosomes, and contigs - [merge_atac_qc.R](src/merge_atac_qc.R): merge wet lab QC, curated pipeline QC, and alignment stats    
