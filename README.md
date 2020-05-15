@@ -54,7 +54,9 @@ This documentation is intended to help individuals who are preparing ATAC-seq da
     
     4.2 Generate a spreadsheet of QC metrics for all samples with `qc2tsv`
 
-5. [Flag problematic samples](#5-flag-problematic-samples)
+5. [Flag problematic samples](#5-flag-problematic-samples)  
+
+6. [Post-processing scripts](#6-post-processing-scripts)
 
 
 ## 1. Prepare ATAC-seq data for submission to the BIC 
@@ -373,3 +375,9 @@ The following metrics are not strictly exclusion criteria for MoTrPAC samples, b
 |A nucleosome-free region is not present| align.frag_len_stat.nfr_peak_exists == false|This should be enforced more strictly|
 |A mononucleosome peak is not present|align.frag_len_stat.mono_nuc_peak_exists == false|This should be enforced more strictly|
 |TSS enrichment < ?|align_enrich.tss_enrich.tss_enrich|This cutoff needs to be evaluated retrospectively. We will probably have tissue-specific recommendations |
+
+## 6. Post-processing scripts 
+- [extract_rep_names_from_encode.sh](src/extract_rep_names_from_encode.sh): generate rep-to-viallabel map to interpret QC report   
+- [pass_extract_atac_from_gcp.sh](src/pass_extract_atac_from_gcp.sh): download relevant files from ENCODE output  
+- [encode_to_count_matrix.sh](src/encode_to_count_matrix.sh): use `narrowkpeak.gz` and `tagAlign` files to generate a peak x sample raw counts matrix  
+- [align_stats.sh](src/align_stats.sh): calculate % of primary alignments aligning to chrX, chrY, chrM, autosomes, and contigs - [merge_atac_qc.R](src/merge_atac_qc.R): merge wet lab QC, curated pipeline QC, and alignment stats    
