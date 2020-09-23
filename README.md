@@ -132,6 +132,54 @@ Clone the v1.7.0 ENCODE repository and this repository in a folder in your home 
 cd ~/ATAC_PIPELINE
 git clone --single-branch --branch v1.7.0 https://github.com/ENCODE-DCC/atac-seq-pipeline.git
 ```
+**IMPORTANT: The following change needs to be made to ~/ATAC_PIPELINE/atac-seq-pipeline/atac.wdl.**  
+At the end of `~/ATAC_PIPELINE/atac-seq-pipeline/atac.wdl`, find this block of code:
+```
+task raise_exception {
+	String msg
+	command {
+		echo -e "\n* Error: ${msg}\n" >&2
+		exit 2
+	}
+	output {
+		String error_msg = '${msg}'
+	}
+	runtime {
+		maxRetries : 0
+	}
+}
+```
+Replace the `runtime` parameters in the `raise_exception` task with these:
+```
+    runtime {
+        maxRetries : 0
+        cpu : 1
+        memory : '2 GB'
+        time : 1
+        disks : 'local-disk 10 SSD'
+    }
+```
+**If you do not make this change, you will get the following error when you try to run the pipeline:**
+```bash
+Task raise_exception has an invalid runtime attribute memory = !! NOT FOUND !!
+
+* Found failures JSON object.
+[
+    {
+        "causedBy": [
+            {
+                "causedBy": [],
+                "message": "Task raise_exception has an invalid runtime attribute memory = !! NOT FOUND !!"
+            },
+            {
+                "causedBy": [],
+                "message": "Task raise_exception has an invalid runtime attribute memory = !! NOT FOUND !!"
+            }
+        ],
+        "message": "Runtime validation failed"
+    }
+]
+```
 
 ### 2.2 Install the `Conda` environment with all software dependencies  
 Install `conda` by following [these instructions](https://github.com/ENCODE-DCC/atac-seq-pipeline/blob/master/docs/install_conda.md). Perform Step 5 in a `screen` or `tmux` session, as it can take some time.   
