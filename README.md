@@ -67,7 +67,7 @@ This documentation will assume you clone it in a folder called `ATAC_PIPELINE` i
 cd ~
 mkdir ATAC_PIPELINE
 cd ATAC_PIPELINE
-git clone https://github.com/nicolerg/motrpac-atac-seq-pipeline.git
+git clone https://github.com/MoTrPAC/motrpac-atac-seq-pipeline.git
 ```
 
 ### 1.2 Generate and format FASTQs 
@@ -335,6 +335,7 @@ for json in $(ls ${JSON_DIR}); do
   JOB_NAME=$(basename ${INPUT_JSON} | sed "s/\.json.*//")
 
   sbatch -A ${ACCOUNT} -J ${JOB_NAME} --export=ALL --mem 2G -t 4-0 --wrap "caper run ${ATACSRC}/atac.wdl -i ${INPUT_JSON}"
+  sleep 60 # necessary to prevent a collision error
 done
 ```
 
