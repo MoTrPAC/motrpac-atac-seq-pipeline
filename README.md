@@ -67,7 +67,7 @@ This documentation will assume you clone it in a folder called `ATAC_PIPELINE` i
 cd ~
 mkdir ATAC_PIPELINE
 cd ATAC_PIPELINE
-git clone https://github.com/nicolerg/motrpac-atac-seq-pipeline.git
+git clone https://github.com/MoTrPAC/motrpac-atac-seq-pipeline.git
 ```
 
 ### 1.2 Generate and format FASTQs 
@@ -131,6 +131,54 @@ Clone the v1.7.0 ENCODE repository and this repository in a folder in your home 
 ```bash
 cd ~/ATAC_PIPELINE
 git clone --single-branch --branch v1.7.0 https://github.com/ENCODE-DCC/atac-seq-pipeline.git
+```
+**IMPORTANT: The following change needs to be made to ~/ATAC_PIPELINE/atac-seq-pipeline/atac.wdl.**  
+At the end of `~/ATAC_PIPELINE/atac-seq-pipeline/atac.wdl`, find this block of code:
+```
+task raise_exception {
+	String msg
+	command {
+		echo -e "\n* Error: ${msg}\n" >&2
+		exit 2
+	}
+	output {
+		String error_msg = '${msg}'
+	}
+	runtime {
+		maxRetries : 0
+	}
+}
+```
+Replace the `runtime` parameters in the `raise_exception` task with these:
+```
+    runtime {
+        maxRetries : 0
+        cpu : 1
+        memory : '2 GB'
+        time : 1
+        disks : 'local-disk 10 SSD'
+    }
+```
+**If you do not make this change, you will get the following error when you try to run the pipeline:**
+```bash
+Task raise_exception has an invalid runtime attribute memory = !! NOT FOUND !!
+
+* Found failures JSON object.
+[
+    {
+        "causedBy": [
+            {
+                "causedBy": [],
+                "message": "Task raise_exception has an invalid runtime attribute memory = !! NOT FOUND !!"
+            },
+            {
+                "causedBy": [],
+                "message": "Task raise_exception has an invalid runtime attribute memory = !! NOT FOUND !!"
+            }
+        ],
+        "message": "Runtime validation failed"
+    }
+]
 ```
 
 ### 2.2 Install the `Conda` environment with all software dependencies  
@@ -287,6 +335,7 @@ for json in $(ls ${JSON_DIR}); do
   JOB_NAME=$(basename ${INPUT_JSON} | sed "s/\.json.*//")
 
   sbatch -A ${ACCOUNT} -J ${JOB_NAME} --export=ALL --mem 2G -t 4-0 --wrap "caper run ${ATACSRC}/atac.wdl -i ${INPUT_JSON}"
+  sleep 60 # necessary to prevent a collision error
 done
 ```
 
