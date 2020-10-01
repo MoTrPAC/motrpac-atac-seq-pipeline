@@ -15,8 +15,8 @@
 # tagalign : 80 * {N_tissues}
 ##
 ## PASS1B:
-# signal   : 58 * {N_tissues}
-# peak     : 20 * {N_tissues}
+# signal   : 62 * {N_tissues}
+# peak     : 24 * {N_tissues}
 # qc       : 1 
 # tagalign : 52 * {N_tissues}
 
