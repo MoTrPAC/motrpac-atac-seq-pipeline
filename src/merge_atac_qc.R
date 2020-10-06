@@ -6,6 +6,7 @@
 library(data.table)
 
 wet = fread('sample_metadata_20200327.csv', sep=',', header=T)
+wet = unique(wet) # remove duplicate rows
 encode = fread('stanford_atac_qc.tsv', sep='\t', header=T)
 rep_to_sample_map = fread('rep_to_sample_map.csv', sep=',', header=F)
 align_stat = fread('merged_chr_info.csv',sep=',',header=T)
