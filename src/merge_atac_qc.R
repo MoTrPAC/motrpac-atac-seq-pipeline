@@ -6,6 +6,7 @@
 library(data.table)
 
 wet = fread('sample_metadata_20200327.csv', sep=',', header=T)
+wet = unique(wet) # remove duplicate rows
 encode = fread('stanford_atac_qc.tsv', sep='\t', header=T)
 rep_to_sample_map = fread('rep_to_sample_map.csv', sep=',', header=F)
 align_stat = fread('merged_chr_info.csv',sep=',',header=T)
@@ -77,7 +78,7 @@ stopifnot(nrow(m2) == nrow(dt))
 # remove columns of all 0 or all 100 
 check_col = function(x){
   if(is.numeric(x)){
-    if(sum(x) == 0 | sum(x) == 100*nrow(m2)){
+    if(sum(x) == 0 | all(x == 100)){
       return(x)
     }
   }
