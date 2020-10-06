@@ -78,7 +78,7 @@ stopifnot(nrow(m2) == nrow(dt))
 # remove columns of all 0 or all 100 
 check_col = function(x){
   if(is.numeric(x)){
-    if(sum(x) == 0 | sum(x) == 100*nrow(m2)){
+    if(sum(x) == 0 | all(x == 100)){
       return(x)
     }
   }
