@@ -19,8 +19,8 @@ option_list <- list(
 
 opt <- parse_args(OptionParser(option_list=option_list))
 
-
-wet <- fread(opt$sample_meta, sep=',', header=TRUE)
+wet = fread(opt$sample_meta, sep=',', header=TRUE)
+wet = unique(wet) # remove duplicate rows
 encode = fread(opt$atac_qc, sep='\t', header=T)
 rep_to_sample_map = fread(opt$sample_mapping_file, sep=',', header=F)
 align_stat = fread(opt$align_stats,sep=',',header=T)
