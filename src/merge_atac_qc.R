@@ -3,13 +3,27 @@
 # 15 May 2020 
 # Fix and merge ATAC-seq QC 
 
-library(data.table)
+#Usage : Rscript src/merge_atac_qc.R -w ~/test_mnt/PASS/atac-seq/stanford/batch4_20200928/Output/final/sample_metadata_20200928.csv -q ~/test_mnt/PASS/atac-seq/stanford/batch4_20200928/Output/final/qc/atac_qc.tsv -m ~/test_mnt/PASS/atac-seq/stanford/batch4_20200928/Output/final/rep_to_sample_map.csv -a ~/test_mnt/PASS/atac-seq/stanford/batch4_20200928/Output/final/merged_chr_info.csv -o ~/test_mnt/PASS/atac-seq/stanford/batch4_20200928/Output/final/
 
-wet = fread('sample_metadata_20200327.csv', sep=',', header=T)
+library(data.table)
+library(optparse)
+
+option_list <- list(
+	make_option(c("-w", "--sample_meta"), help="Absolute path to wetlab sample metadata file, e.g. sample_metadata_YYYYMMDD.csv"),
+	make_option(c("-q", "--atac_qc"), help="Absolute path to pipeline qc metrics file output of qc2tsv tool, e.g. atac_qc.tsv"),
+	make_option(c("-m", "--sample_mapping_file"), help="Absolute path to replicate to sample mapping file, e.g. rep_to_sample_map.csv"),
+	make_option(c("-a", "--align_stats"), help="Absolute path to genome alignment stats file, e.g. merged_chr_info.csv"),
+	make_option(c("-o", "--outdir", help="Absolute path to output directory for the merged qc reports"))
+
+)
+
+opt <- parse_args(OptionParser(option_list=option_list))
+
+wet = fread(opt$sample_meta, sep=',', header=TRUE)
 wet = unique(wet) # remove duplicate rows
-encode = fread('stanford_atac_qc.tsv', sep='\t', header=T)
-rep_to_sample_map = fread('rep_to_sample_map.csv', sep=',', header=F)
-align_stat = fread('merged_chr_info.csv',sep=',',header=T)
+encode = fread(opt$atac_qc, sep='\t', header=T)
+rep_to_sample_map = fread(opt$sample_mapping_file, sep=',', header=F)
+align_stat = fread(opt$align_stats,sep=',',header=T)
 
 ###################################################################################
 ## fix ENCODE QC
@@ -78,7 +92,7 @@ stopifnot(nrow(m2) == nrow(dt))
 # remove columns of all 0 or all 100 
 check_col = function(x){
   if(is.numeric(x)){
-    if(sum(x) == 0 | all(x == 100)){
+    if(sum(as.numeric(x)) == 0 | all(x == 100)){
       return(x)
     }
   }
@@ -91,7 +105,9 @@ m2[,names(res):=NULL]
 head(m2)
 
 # write out merged QC 
-write.table(m2, file='merged_atac_qc.tsv', sep='\t', col.names=T, row.names=F, quote=F)
+outfile <- paste0(opt$outdir, '/', 'merged_atac_qc.tsv')
+write.table(m2, file=outfile, sep='\t', col.names=T, row.names=F, quote=F)
 
-# write out workflow-level QC 
-write.table(workflow_qc, file='encode_workflow_level_atac_qc.tsv', sep='\t', col.names=T, row.names=F, quote=F)
+# write out workflow-level QC
+outfile_workflow <- paste0(opt$outdir, '/', 'encode_workflow_level_atac_qc.tsv')
+write.table(workflow_qc, file=outfile_workflow, sep='\t', col.names=T, row.names=F, quote=F)
