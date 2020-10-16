@@ -54,6 +54,9 @@ gscopy () {
 	if [[ $condition != *"GET-STDRef-Set"* ]]; then 
 		gsutil cp -n ${subdir}signal/pooled-rep/basename_prefix.pooled.pval.signal.bigwig signal/${condition}.pooled.pval.signal.bigwig
 	fi
+	
+	# qc.html
+	gsutil cp -n ${subdir}qc/qc.html qc/${condition}.qc.html
 }
 export -f gscopy
 parallel --verbose --jobs ${cores} gscopy ::: $(gsutil ls ${gsurl} | grep -E "/$")
