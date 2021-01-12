@@ -1,10 +1,13 @@
 #!/bin/bash
-# Nicole Gay
+# Nicole Gay, modified by Archana Raja
 # 31 March 2020
 # pull replicate names from ATAC pipeline stucture
+#Usage : bash src/extract_rep_names_from_encode.sh <gcp-path-to-atac-run-with-trailing-slash> <gcp-path-to-output-results-bucket-with-trailing-slash>
 
-for dir in $(gsutil ls gs://motrpac-portal-transfer-stanford/Output/atac-seq/batch1/); do
+run_dir=$1
+out_gcp_path=$2
 
+for dir in $(gsutil ls ${run_dir}); do
 	# get condition name
 	gsutil cp $(gsutil ls ${dir}call-qc_report/glob*/qc.json) .
 	condition=$(grep "description" qc.json  | sed 's/.*: "//' | sed 's/".*//')
@@ -27,3 +30,8 @@ for dir in $(gsutil ls gs://motrpac-portal-transfer-stanford/Output/atac-seq/bat
 		rep=$((rep + 1))
 	done
 done
+
+#copy outputs to gcp and delete the local copies
+gsutil -m cp -r rep_to_sample_map.csv ${out_gcp_path}/
+rm -rf rep_to_sample_map.csv
+rm -rf qc.json
