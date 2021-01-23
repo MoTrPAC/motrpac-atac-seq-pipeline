@@ -8,6 +8,6 @@ outfile_name=$2
 gsutil ls ${gcp_path}/*/*/qc/qc.json >file_list.txt
 echo "Done creating file list"
 qc2tsv --file file_list.txt --collapse-header >${outfile_name}
-gsutil mv ${outfile_name} ${gcp_path}/
+gsutil mv ${outfile_name} ${gcp_path}/final/
 rm -rf file_list.txt 
 echo "Done creating atac-seq qc report"
