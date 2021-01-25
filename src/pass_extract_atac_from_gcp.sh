@@ -22,17 +22,9 @@
 
 set -e
 cores=$1 # number of processes to run in parallel
-download_dir=$2 # gcp or local output directory path
-gsurl=$3 # gcp path to croo outputs
+download_dir=$2 # gcp or local output directory path without trailing slash
+gsurl=$3 # gcp path to croo outputs without trailing slash
 copy_dest=$4 # mode of copy use "gcp" if the copy destination is on gcp or "local" 
-#download_dir=/projects/motrpac/PASS1A/ATAC/NOVASEQ_BATCH2/outputs
-
-#gsurl=gs://motrpac-portal-transfer-stanford/Output/atac-seq/batch_20200318
-#gcp
-#download_dir=gs://rna-seq_araja/test/atac-seq/test2
-#local
-#download_dir=/projects/motrpac/PASS1A/ATAC/NOVASEQ_BATCH7/outputs
-#gsurl=gs://rna-seq_araja/PASS/atac-seq/stanford/batch7_20201002/Output
 
 if [[ "$copy_dest" == "gcp" ]]; then
 
