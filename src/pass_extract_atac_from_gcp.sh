@@ -40,8 +40,8 @@ if [[ "$copy_dest" == "gcp" ]]; then
 	# individiual tagalign files
     gsutil -m cp -n ${gsurl}/*/*/align/rep?/*tagAlign.gz ${download_dir}/tagalign/
 
-    # individual signal track (p-value)
-    gsutil -m cp -n ${gsurl}/*/*/signal/rep?/*pval.signal.bigwig ${download_dir}/signal/
+	# individual signal track (p-value)
+	gsutil -m cp -n ${gsurl}/*/*/signal/rep?/*pval.signal.bigwig ${download_dir}/signal/
 
 elif [[ $copy_dest == "local" ]]; then
 	cd ${download_dir}
@@ -99,8 +99,8 @@ gscopygcp () {
                 gsutil -m cp -n ${subdir}signal/pooled-rep/basename_prefix.pooled.pval.signal.bigwig ${outdir}/signal/${condition}.pooled.pval.signal.bigwig
         fi
 
-        # qc.html
-        gsutil cp -n ${subdir}qc/qc.html ${outdir}/qc/${condition}.qc.html
+	# qc.html
+	gsutil cp -n ${subdir}qc/qc.html ${outdir}/qc/${condition}.qc.html
 }
 
 if [[ "$copy_dest" == "gcp" ]]; then
@@ -110,8 +110,8 @@ if [[ "$copy_dest" == "gcp" ]]; then
 
 elif [[ "$copy_dest" == "local" ]]; then
 
-    export -f gscopy
-    parallel --verbose --jobs ${cores} gscopy ::: $(gsutil ls ${gsurl} | grep -E "/$"|grep -v "final")
+	export -f gscopy
+	parallel --verbose --jobs ${cores} gscopy ::: $(gsutil ls ${gsurl} | grep -E "/$"|grep -v "final")
 
 fi
 
