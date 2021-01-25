@@ -21,13 +21,12 @@
 # tagalign : 52 * {N_tissues}
 
 set -e
-
 cores=$1 # number of processes to run in parallel
 download_dir=$2 # gcp or local output directory path
 gsurl=$3 # gcp path to croo outputs
 copy_dest=$4 # mode of copy use "gcp" if the copy destination is on gcp or "local" 
-
 #download_dir=/projects/motrpac/PASS1A/ATAC/NOVASEQ_BATCH2/outputs
+
 #gsurl=gs://motrpac-portal-transfer-stanford/Output/atac-seq/batch_20200318
 #gcp
 #download_dir=gs://rna-seq_araja/test/atac-seq/test2
@@ -38,7 +37,7 @@ copy_dest=$4 # mode of copy use "gcp" if the copy destination is on gcp or "loca
 if [[ "$copy_dest" == "gcp" ]]; then
 
 	# individiual tagalign files
-    gsutil -m cp -n ${gsurl}/*/*/align/rep?/*tagAlign.gz ${download_dir}/tagalign/
+	gsutil -m cp -n ${gsurl}/*/*/align/rep?/*tagAlign.gz ${download_dir}/tagalign/
 
 	# individual signal track (p-value)
 	gsutil -m cp -n ${gsurl}/*/*/signal/rep?/*pval.signal.bigwig ${download_dir}/signal/
@@ -62,7 +61,7 @@ elif [[ $copy_dest == "local" ]]; then
 
 else
 	echo "Invalid value for \"copy_dest\", must be \"gcp\" or \"local\" only"
-    exit 1
+	exit 1
 fi
 
 gscopy () {
@@ -104,12 +103,10 @@ gscopygcp () {
 }
 
 if [[ "$copy_dest" == "gcp" ]]; then
-
 	export -f gscopy
 	parallel --verbose --jobs ${cores} gscopy ::: $(gsutil ls ${gsurl} | grep -E "/$")
 
 elif [[ "$copy_dest" == "local" ]]; then
-
 	export -f gscopy
 	parallel --verbose --jobs ${cores} gscopy ::: $(gsutil ls ${gsurl} | grep -E "/$"|grep -v "final")
 
