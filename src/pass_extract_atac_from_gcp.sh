@@ -95,8 +95,8 @@ gscopygcp () {
 }
 
 if [[ "$copy_dest" == "gcp" ]]; then
-	export -f gscopy
-	parallel --verbose --jobs ${cores} gscopy ::: $(gsutil ls ${gsurl} | grep -E "/$")
+	export -f gscopygcp
+	parallel --verbose --jobs ${cores} gscopygcp ::: $(gsutil ls ${gsurl} | grep -E "/$"|grep -v "final")
 
 elif [[ "$copy_dest" == "local" ]]; then
 	export -f gscopy
