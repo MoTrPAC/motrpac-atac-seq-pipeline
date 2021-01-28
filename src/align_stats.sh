@@ -2,17 +2,23 @@
 # Nicole Gay
 # 13 May 2020
 # ATAC-seq alignment stats
-# usage: bash align_stats.sh [NUM_CORES]
-
+# usage: bash align_stats.sh [NUM_CORES] [indir] [bamdir]
+# make sure the vm has bc and samtools istalled
+# sudo apt install bc
 set -e 
 
 cores=$1
+indir=$2
+bamdir=$3
 
-indir=/projects/motrpac/PASS1A/ATAC/NOVASEQ_BATCH2/outputs
+#indir=/projects/motrpac/PASS1A/ATAC/NOVASEQ_BATCH2/outputs
+#indir=~/test_mnt/PASS/atac-seq/stanford/batch4_20200928/Output/final
 # path to ENCODE outputs, anywhere upstream of the bam files
 # also where output folder will be made
+#bamdir=~/test_mnt/PASS/atac-seq/stanford/batch4_20200928/Output
+#path to the location of unfiltered bam files (*_R1.trim.bam)
 
-module load samtools
+#module load samtools
 
 cd ${indir}
 mkdir -p idxstats # make outdir
@@ -49,8 +55,10 @@ align_stats () {
 	echo ${viallabel},${total},${pct_x},${pct_y},${pct_mt},${pct_auto},${pct_contig} >> idxstats/${viallabel}_chrinfo.csv
 }
 export -f align_stats
-parallel --verbose --jobs ${cores} align_stats ::: $(find -name "*_R1.trim.bam")
+#parallel --verbose --jobs ${cores} align_stats ::: $(find -name "*_R1.trim.bam")
+parallel --verbose --jobs ${cores} align_stats ::: $(ls ${bamdir}/*/*/align/rep*/*.trim.bam)
 
 # collapse
-head -1 $(find -name "*_chrinfo.csv" | head -1) > merged_chr_info.csv
-for file in $(find -name "*_chrinfo.csv"); do sed -e '1d' $file >> merged_chr_info.csv; done
+#head -1 $(find -name "*_chrinfo.csv" | head -1) > merged_chr_info.csv
+#for file in $(find -name "*_chrinfo.csv"); do sed -e '1d' $file >> merged_chr_info.csv; done
+cat idxstats/*_chrinfo.csv|grep -v "^viallabel"|sed '1iviallabel,total_primary_alignments,pct_chrX,pct_chrY,pct_chrM,pct_auto,pct_contig' >merged_chr_info.csv
