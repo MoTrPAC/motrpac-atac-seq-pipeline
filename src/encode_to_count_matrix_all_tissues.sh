@@ -45,7 +45,7 @@ echo "Success! Finished sorting and merging"
 mkdir -p ${indir}/${final_results_dir}/counts_matrix
 intersect_tag () {
 	local tag=$1
-	local results_dir=$(ls|grep "test")
+	local results_dir=$(ls|grep "final")
 	#echo "results dir is" ${results_dir}
 	#echo "tag is" ${tag}
 	local viallabel=$(basename $tag | sed "s/_.*//")
