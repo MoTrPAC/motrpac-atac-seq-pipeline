@@ -25,7 +25,7 @@ batch_count=1
 
 #get replicates to sample mapping file
 
-bash src/extract_rep_names_from_encode.sh ${pipeline_output_path}/ ${download_dir}/
+#bash src/extract_rep_names_from_encode.sh ${pipeline_output_path}/ ${download_dir}/
 python3 encode_rep_names_from_croo.py ${croo_output_path} ${download_dir}/ <gcp_project>
 echo "Success! Done creation of sample mapping file"
 
