@@ -3,7 +3,7 @@ set -Eeuxo pipefail
 trap "echo ERR trap fired!" ERR 
 # Author: Nicole Gay, Anna Scherbina 
 # Updated: 7 May 2020 
-# Script : encode_to_count_matrix.sh ${indir} ${srcdir} ${batch_file} ${cores}
+# Script : encode_to_count_matrix.sh ${indir} ${srcdir} ${batch_file} ${cores} ${final_results_dir}
 # Purpose: generate peak x sample read counts matrix from tagAlign and hammock files 
 # Run pass_extract_from_gcp.sh before this 
 
@@ -27,12 +27,34 @@ trap "echo ERR trap fired!" ERR
 indir=$1
 srcdir=$2
 batch_file=$3
-cores=$4 
+cores=$4
+final_results_dir=$5
+mode=$6
 ############################################################
 
-outdir=${indir}/${final_results_dir}/merged_peaks  
+#batch_count=`wc -l ${batch_file}|sed 's/ //'`
+#batch_count=echo $batch_count|sed 's/\\//'
+#echo ${batch_count}
+
+#make the same code usable for generating counts from single or multiple batches
+
+outdir=${indir}/${final_results_dir}/merged_peaks
+echo ${outdir}
 mkdir -p ${outdir}
-cd ${indir}
+
+if [[ ${mode} == 0 ]]; then
+	batch_name=`cat $batch_file|head -n1`
+	echo $batch_name	
+	#cd ${indir}/batch1_20210210/Output
+	cd ${indir}/${batch_name}/Output
+elif [[ ${mode} == 1 ]]; then
+	cd ${indir}
+else
+	echo ${mode}
+	echo " In valid value. Valid values or "0" for one or "1" for multiple batches"
+	exit
+fi
+
 
 #concatenate peaks (narrowpeak.gz)
 for i in `cat ${batch_file}`;do
@@ -65,7 +87,7 @@ intersect_tag () {
 export -f intersect_tag
 
 for i in `cat ${batch_file}`;do
-	tag_align=$(ls $i/Output/final/tagalign/*tagAlign.gz)
+	tag_align=$(ls ${indir}/$i/Output/final/tagalign/*tagAlign.gz)
 	echo ${tag_align}
 	echo ${final_results_dir}
 	parallel --verbose --jobs ${cores} intersect_tag ::: $(echo ${tag_align})
@@ -88,4 +110,5 @@ for i in `cat ${indir}/${final_results_dir}/tmp_tids.txt`;do
 done
 rm ${indir}/${final_results_dir}/tmp_tids.txt
 rm ${indir}/${final_results_dir}/index
+
 echo "Success generating counts matrix"
