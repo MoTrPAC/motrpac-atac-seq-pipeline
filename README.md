@@ -375,7 +375,7 @@ done
 This is most useful if you ran the pipeline for multiple samples. **Step 4.1** generates a `qc/qc.json` file for each pipeline run. After installing `qc2tsv` within the `encode-atac-seq-pipeline` `Conda` environment (`pip install qc2tsv`), run the following command to compile a spreadsheet with QC from all samples: 
 ```
 cd ${outdir}/atac
-qc2tsv $(find -path "*/qc/qc.json") --collapse-header > spreadsheet.tsv
+qc2tsv $(find -path "*/call-qc_report/execution/glob-*/qc.json") --collapse-header > spreadsheet.tsv
 ```
 
 **Table 4.2** provides definitions for a limited number of metrics included in the JSON QC reports. The full JSON report includes >100 metrics per sample; some lines are duplicates, and many metrics are irrelevant for running the pipeline with a single biological replicate. 
