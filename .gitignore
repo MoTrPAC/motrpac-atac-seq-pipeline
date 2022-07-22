@@ -1,0 +1,4 @@
+config/
+metadata/
+.DS_Store
+test_data/
