@@ -347,7 +347,7 @@ done
 conda activate encode-atac-seq-pipeline
 
 cd ${OUTDIR}/atac
-for dir in *; do 
+for dir in $(ls */metadata.json | sed "s:/metadata\.json::"); do 
   cd $dir
   croo metadata.json 
   cd ..
