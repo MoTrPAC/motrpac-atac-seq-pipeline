@@ -1,58 +1,145 @@
+import asyncio
 import json
 import argparse
-import time
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from typing import Dict
 
-import requests
+from aiohttp import ClientSession
 
 
-def get_status(submission_id):
-    res = requests.get(
+async def get_status(
+    workflow_id: str, session: ClientSession
+) -> Dict[str, Dict[str, str]]:
+    """
+    This function gets the status of a workflow.
+    :param workflow_id: The workflow ID
+    :param session: The aiohttp session
+    :return:
+    """
+    res = await session.get(
         f"http://localhost:8000/api/workflows/v1/query",
-        params={"id": submission_id, "additionalQueryResultFields": "labels"},
+        params={"id": workflow_id, "additionalQueryResultFields": "labels"},
     )
-    res_json = res.json()
+    res_json = await res.json()
+    # get the status of the workflow
     wf_metadata = res_json["results"][0]
     status = wf_metadata["status"]
+    # and the label of the workflow (the submitted JSON filename or other custom label)
     labels = wf_metadata["labels"]
-    return {submission_id: {"status": status, "labels": labels["caper-str-label"]}}
+    return {workflow_id: {"status": status, "labels": labels}}
 
 
-def loop_execution_status(submission_map_fp: str):
+async def get_metadata(workflow_id, session: ClientSession):
+    res = await session.get(
+        f"http://localhost:8000/api/workflows/v1/{workflow_id}/metadata"
+    )
+    res_json = await res.json()
+    calls = res_json["calls"]
+    calls_dict = {}
+    # iterate through the various call attempts
+    for call_name, call_attempts in calls.items():
+        attempts = (0, 1)
+        # find the latest attempt and its index (sometimes the latest attempt comes out
+        # of order, although this is rare, we need to account for it)
+        for i, attempt in enumerate(call_attempts):
+            # compare the latest attempt to the current attempt
+            is_latest = max(attempts[1], attempt["attempt"])
+            if is_latest:
+                attempts = (i, attempt["attempt"])
+
+        # set the latest attempt
+        latest_task_attempt = call_attempts[attempts[0]]
+
+        # get the status of the latest attempt
+        task_status = latest_task_attempt["executionStatus"]
+        # we only want to fetch the rest of the metadata if the task is running
+        if task_status != "Done":
+            task_dict = {
+                "attempt": latest_task_attempt["attempt"],
+                "status": task_status,
+                "logs": latest_task_attempt.get("backendLogs", {}).get("log", None),
+            }
+            task_execution_events = latest_task_attempt.get("executionEvents", None)
+            if task_execution_events:
+                task_dict["execution_events"] = task_execution_events
+        else:
+            task_dict = task_status
+
+        calls_dict[call_name] = task_dict
+
+    return calls_dict
+
+
+async def loop_execution_status(submission_map_fp: str):
+    """
+    This function loops over the workflow IDs in the submission map and prints the status
+    continually until all workflows are done.
+
+    :param submission_map_fp: The path to the submission map file
+    """
+    # load all the workflow IDs that we want to monitor
     with open(submission_map_fp, "r") as f:
         submission_map = json.load(f)
 
+    # we want to keep track of whether we are on the first loop to overwrite stdout
     first_loop = True
+    # keep track of the number of previous lines, again for overwriting stdout
     prev_line_count = 0
     while True:
-        status_dict = {}
-        with ThreadPoolExecutor(max_workers=10) as executor:
+        # get the status of all the workflows
+        async with ClientSession() as session:
             futures = []
-
             for pair in submission_map:
-                f = executor.submit(get_status, pair["workflow_id"])
-                futures.append(f)
+                futures.append(get_status(pair["workflow_id"], session))
+            # gather all the futures
+            finished = await asyncio.gather(*futures)
 
-            for fut in as_completed(futures):
-                res_dict = fut.result()
-                status_dict.update(res_dict)
+        # create a single dictionary of all the workflow IDs and their statuses and
+        # filter workflows that are not running
+        status_dict = {
+            k: v
+            for d in finished
+            for k, v in d.items()
+            if v.get("status") != "Succeeded" and v.get("status") != "Failed"
+        }
 
-        filtered_status_dict = dict(
-            filter(lambda elem: elem[1]["status"] != "Succeeded", status_dict.items())
-        )
+        # break if there are no more workflows that have not "succeeded" or "failed"
+        if len(status_dict) == 0:
+            print("\033[F" * prev_line_count)
+            print("All workflows are done!")
+            break
+
+        # get metadata of non-succeeded workflows only
+        async with ClientSession() as session:
+            futures = []
+            # submit our futures
+            for k in status_dict.keys():
+                futures.append(get_metadata(k, session))
+            # gather all the futures
+            finished = await asyncio.gather(*futures)
+
+        # add a calls key for metadata about the latest calls
+        for k, v in zip(status_dict.keys(), finished):
+            status_dict[k]["calls"] = v
+
+        # sort the workflows by their status
         sorted_status_dict = {
             k: v
-            for k, v in sorted(
-                filtered_status_dict.items(), key=lambda item: item[1]["status"]
-            )
+            for k, v in sorted(status_dict.items(), key=lambda item: item[1]["status"])
         }
+
         fmt_status_dict = json.dumps(sorted_status_dict, indent=4)
+        # we want to erase what we wrote previously by sending the escape sequence
+        # the number of times we wrote to stdout previously
         if not first_loop:
             print("\033[F" * prev_line_count)
+
+        # print the status of the workflows
         print(fmt_status_dict)
+        # update the number of lines we wrote to stdout
         first_loop = False
         prev_line_count = len(fmt_status_dict.splitlines()) + 1
-        time.sleep(5)
+        # pause for a bit
+        await asyncio.sleep(5)
 
 
 def main():
@@ -64,7 +151,7 @@ def main():
     )
     args = parser.parse_args()
     try:
-        loop_execution_status(args.workflow_id_file)
+        asyncio.run(loop_execution_status(args.workflow_id_file))
     except KeyboardInterrupt:
         print("KeyboardInterrupt received, exiting...")
         exit()
