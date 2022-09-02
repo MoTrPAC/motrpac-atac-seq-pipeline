@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 set -Eeuxo pipefail
 #Usage: bash atac-post-process_wrapper.sh
 # On gcp , make sure that the bucket containing the inputs is mounted before running the script
@@ -42,7 +42,7 @@ echo "Success! Done creation of qc2tsv report"
 
 # reorganize croo outputs for quantification
 
-bash ${script_dir}/pass_extract_atac_from_gcp.sh ${copy_cores} ${download_dir} ${croo_output_path} ${copy_dest}
+bash ${script_dir}/pass_extract_atac_from_gcp.sh ${copy_cores} ${croo_output_path} ${download_dir} ${copy_dest}
 
 echo "Success! Done copying files for quantification"
 
