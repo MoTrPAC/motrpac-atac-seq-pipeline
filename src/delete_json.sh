@@ -1,22 +1,23 @@
 #!/bin/bash
-if [ $# -lt 1 ]; then
-    echo
-    echo "Usage: ./delete_json.sh [JSON_DIR]"
-    echo
-    echo "Deletes the JSON files in [JSON_DIR] that correspond to existing submissions that Cromwell has completed."
-    echo "Requires Cromwell to be running and jq to be installed."
-    echo
-    echo "Example: ./delete_json.sh json/"
-    echo "[JSON_DIR]: the directory containing JSON files to use as the WDL inputs"
-    echo
-    exit 1
+# Gets a list of all the workflows that have been run, and deletes the corresponding input json files
+
+if [ $# -lt 2 ]; then
+  echo "Usage: ./delete_json.sh [SUBMITTED_LABELS] [JSON_DIR]"
+  echd
+  echo "Example: delete_json.sh labels.txt jsons"
+  echo
+  echo "[SUBMITTED_LABELS]: a file containing a list of labels of the submitted jobs"
+  echo "[JSON_DIR]: The directory where the JSON files are stored"
+  echo
+  exit 1
 fi
 
-submitted_labels=$(curl -X GET 'http://localhost:8000/api/workflows/v1/query?additionalQueryResultFields=labels' | jq -r '.results| .[] | .labels["caper-str-label"]')
+SUBMITTED_LABELS=$1
+JSON_DIR=$2
 
-readarray -t lines <<<"$submitted_labels"
+readarray -t lines <<<"$SUBMITTED_LABELS"
 
 for line in "${lines[@]}"; do
-    echo "Deleting $line.json"
-    rm "$1"/"$line".json || true
+  echo "Deleting $line.json"
+  rm "${JSON_DIR%/}"/"$line".json || true
 done
