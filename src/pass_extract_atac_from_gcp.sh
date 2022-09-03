@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -e
-
 # Nicole Gay, modified by Archana to work on copying outputs to GCP and locally
 # 6 May 2020
 #

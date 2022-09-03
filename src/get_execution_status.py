@@ -1,6 +1,7 @@
 import asyncio
 import json
 import argparse
+from pathlib import Path
 from typing import Dict
 
 from aiohttp import ClientSession
@@ -24,8 +25,9 @@ async def get_status(
     wf_metadata = res_json["results"][0]
     status = wf_metadata["status"]
     # and the label of the workflow (the submitted JSON filename or other custom label)
-    labels = wf_metadata["labels"]
-    return {workflow_id: {"status": status, "labels": labels}}
+    labels = wf_metadata.get("labels", {})
+    label = labels.get("caper-str-label", None)
+    return {workflow_id: {"status": status, "label": label}}
 
 
 async def get_metadata(workflow_id, session: ClientSession):
@@ -55,7 +57,8 @@ async def get_metadata(workflow_id, session: ClientSession):
         if task_status != "Done":
             task_dict = {
                 "attempt": latest_task_attempt["attempt"],
-                "status": task_status,
+                "cromwell_status": task_status,
+                "backend_status": latest_task_attempt.get("backendStatus"),
                 "logs": latest_task_attempt.get("backendLogs", {}).get("log", None),
             }
             task_execution_events = latest_task_attempt.get("executionEvents", None)
@@ -74,10 +77,11 @@ async def loop_execution_status(submission_map_fp: str):
     This function loops over the workflow IDs in the submission map and prints the status
     continually until all workflows are done.
 
-    :param submission_map_fp: The path to the submission map file
+    :param submission_map_fp: The path to the submission map file (created by submit.sh)
     """
+    submit_fp = Path(submission_map_fp)
     # load all the workflow IDs that we want to monitor
-    with open(submission_map_fp, "r") as f:
+    with open(submit_fp, "r") as f:
         submission_map = json.load(f)
 
     # we want to keep track of whether we are on the first loop to overwrite stdout
@@ -89,7 +93,8 @@ async def loop_execution_status(submission_map_fp: str):
         async with ClientSession() as session:
             futures = []
             for pair in submission_map:
-                futures.append(get_status(pair["workflow_id"], session))
+                t = asyncio.create_task(get_status(pair["workflow_id"], session))
+                futures.append(t)
             # gather all the futures
             finished = await asyncio.gather(*futures)
 
@@ -104,7 +109,7 @@ async def loop_execution_status(submission_map_fp: str):
 
         # break if there are no more workflows that have not "succeeded" or "failed"
         if len(status_dict) == 0:
-            print("\033[F" * prev_line_count)
+            print("\x1b[1A\x1b[2K" * prev_line_count)
             print("All workflows are done!")
             break
 
@@ -113,7 +118,8 @@ async def loop_execution_status(submission_map_fp: str):
             futures = []
             # submit our futures
             for k in status_dict.keys():
-                futures.append(get_metadata(k, session))
+                t = asyncio.create_task(get_metadata(k, session))
+                futures.append(t)
             # gather all the futures
             finished = await asyncio.gather(*futures)
 
@@ -128,10 +134,14 @@ async def loop_execution_status(submission_map_fp: str):
         }
 
         fmt_status_dict = json.dumps(sorted_status_dict, indent=4)
+
+        with open(f"{submit_fp.stem}_status.json", "w") as f:
+            json.dump(sorted_status_dict, f, indent=4)
+
         # we want to erase what we wrote previously by sending the escape sequence
         # the number of times we wrote to stdout previously
         if not first_loop:
-            print("\033[F" * prev_line_count)
+            print("\x1b[1A\x1b[2K" * prev_line_count)
 
         # print the status of the workflows
         print(fmt_status_dict)
@@ -139,7 +149,7 @@ async def loop_execution_status(submission_map_fp: str):
         first_loop = False
         prev_line_count = len(fmt_status_dict.splitlines()) + 1
         # pause for a bit
-        await asyncio.sleep(5)
+        await asyncio.sleep(15)
 
 
 def main():

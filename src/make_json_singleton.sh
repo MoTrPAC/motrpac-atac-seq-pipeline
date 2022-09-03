@@ -5,7 +5,7 @@
 
 set -eux
 
-if [ $# -lt 2 ]; then
+if [ $# -lt 3 ]; then
   echo "Usage: ./make_json.sh [JSON_BASE] [FASTQ_DIR] [JSON_DIR]"
   echd
   echo "Example: make_json.sh base.json /home/user/fastq jsons"

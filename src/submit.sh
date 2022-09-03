@@ -2,7 +2,7 @@
 
 if [ $# -lt 4 ]; then
   echo
-  echo "Usage: ./submit.sh [PYTHON_LOCATION] [WDL_FILE] [JSON_DIR] [WF_ID_FILE]"
+  echo "Usage: ./submit.sh [PYTHON_LOCATION] [WDL_FILE] [JSON_DIR] [WF_ID_MAP]"
   echo
   echo "Example: ./submit.sh \$(which python) atac.wdl json/ wfids.json"
   echo "[PYTHON_LOCATION]: The python with caper installed"
@@ -17,6 +17,7 @@ PYTHON=$1
 WDL_FILE=$2
 JSON_DIR=${3/%\//}
 WF_ID_MAP=$4
+NUM_CORES=4
 
 if ! [ -f "$WDL_FILE" ]; then
   echo "$WDL_FILE does not exist"
@@ -31,23 +32,28 @@ echo "[" >"$WF_ID_MAP"
 
 function submit_file() {
   local input_json_file=$1
+  echo
+  echo "Submitting $input_json_file"
   local submission_output
   local workflow_id
   local json_str
 
   submission_output=$($PYTHON -m caper submit -i "$input_json_file" "$WDL_FILE" 2>&1)
-  workflow_id=$(echo "$submission_output" | tail -n1 | sed -E 's/(.*)(\{[^}]*\})/\2/g' | sed -E 's/'\''/\"/g' | jq -r '.id')
-
+  parsed_output=$(echo "$submission_output" | tail -n1 | sed -E 's/(.*)(\{[^}]*\})/\2/g' | sed -E 's/'\''/\"/g')
+  echo "$parsed_output"
+  workflow_id=$(echo "$parsed_output" | jq -r '.id')
   json_str="{\"label\": \"$(basename "$input_json_file" .json)\", \"workflow_id\": \"$workflow_id\"},"
   echo "$json_str" >>"$WF_ID_MAP"
+
   echo "Submitted $input_json_file"
 }
 
-for f in "$JSON_DIR"/*.json; do
-  echo
-  echo "Submitting $f"
-  submit_file "$f"
-done
+export -f submit_file
+export PYTHON
+export WDL_FILE
+export WF_ID_MAP
+echo "Submitting files in $JSON_DIR"
+parallel --verbose --jobs "$NUM_CORES" submit_file ::: "$JSON_DIR"/*.json
 
 echo "]" >>"$WF_ID_MAP"
 
