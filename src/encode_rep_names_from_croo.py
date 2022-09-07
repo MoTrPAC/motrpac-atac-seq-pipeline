@@ -2,6 +2,7 @@ import argparse
 
 import gcsfs
 import pandas as pd
+from tqdm import tqdm
 
 
 # This script generates replicate to sample mapping file to interpret the qc report. It
@@ -20,18 +21,17 @@ def main(gcp_path: str, output_path: str, workflow_id_fp: str, gcp_project: str)
     fs = gcsfs.GCSFileSystem(project=gcp_project)
     wfl = [line.strip() for line in open(workflow_id_fp, "r")]
 
-    out_df = pd.DataFrame()
     cond_l = []
     rep_l = []
 
     sample_list = []
 
-    for i in wfl:
+    for i in (pbar := tqdm(wfl)):
         workflow_path = f"{gcp_path.rstrip('/')}/{i}"
-        print(f"Processing {i} at {workflow_path}")
+        pbar.set_description(f"Processing {i} at {workflow_path}")
 
         in_path = fs.glob(f"{workflow_path}/**/croo.filetable*.tsv")
-        print(f"Found {len(in_path)} filetable files: {in_path}")
+        pbar.write(f"Found {len(in_path)} filetable files: {in_path}")
 
         if len(in_path) == 0:
             print(f"Skip {i} since no filetable found or exit script?")
@@ -58,8 +58,9 @@ def main(gcp_path: str, output_path: str, workflow_id_fp: str, gcp_project: str)
             sample = (split_vals[-1]).split("_R1.trim.bam")[0]
             sample_list.append(sample)
 
-        print(f"Found {len(filtered[1])} values, finished {i}\n")
+        pbar.write(f"Found {len(filtered[1])} values, finished {i}\n")
 
+    out_df = pd.DataFrame()
     out_df["cond_l"] = cond_l
     out_df["rep_l"] = rep_l
     out_df["sample_list"] = sample_list
@@ -88,7 +89,6 @@ if __name__ == "__main__":
              "tissue",
     )
     parser.add_argument("gcp_project", help="file containing list of workflow ids")
-    parser.add_argument("condition", help="condition name", default=None)
 
     args = parser.parse_args()
 

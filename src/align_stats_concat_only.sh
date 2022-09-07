@@ -32,18 +32,9 @@ mkdir -p idxstats # make outdir
 align_stats() {
   local bam=$1 # 90141015805_R1.trim.bam - UNFILTERED BAM
   local viallabel
-  local primary
 
   viallabel=$(basename "$bam" | sed "s/_R1.*//")
-  echo "$viallabel"
-  primary=idxstats/${viallabel}_primary.bam
-  # already sorted
-  # keep only primary alignments
-  samtools view -b -F 0x900 "$bam" -o "$primary"
-  # index
-  samtools index "$primary"
-  samtools idxstats "$primary" >"idxstats/${viallabel}_chrinfo.txt"
-  rm "$primary" "${primary}.bai"
+  echo "Processing $viallabel"
 
   # get counts
   local total
@@ -71,13 +62,6 @@ align_stats() {
   pct_auto=$(echo "scale=5; ${auto}/${total}*100" | bc -l | sed 's/^\./0./')
   pct_contig=$(echo "scale=5; ${contig}/${total}*100" | bc -l | sed 's/^\./0./')
 
-  echo $viallabel
-  echo $total
-  echo $pct_x
-  echo $pct_y
-  echo $pct_mt
-  echo $pct_auto
-  echo $pct_contig
   # output to file
   echo 'viallabel,total_primary_alignments,pct_chrX,pct_chrY,pct_chrM,pct_auto,pct_contig' >"idxstats/${viallabel}_chrinfo.csv"
   echo "${viallabel},${total},${pct_x},${pct_y},${pct_mt},${pct_auto},${pct_contig}" >>"idxstats/${viallabel}_chrinfo.csv"

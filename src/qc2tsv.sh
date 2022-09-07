@@ -1,6 +1,6 @@
-#!/bin/sh
+#!/bin/bash
 set -Eeuxo pipefail
-trap "echo ERR trap fired!" ERR 
+trap "echo ERR trap fired!" ERR
 #This script generates atac qc tsv report and write the output to a gcp bucket.
 #Usage : bash src/qc2tsv.sh <gcp_path_path_to_croo_outputs> <output_qc_report_name>
 

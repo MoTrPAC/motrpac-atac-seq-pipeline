@@ -1,10 +1,12 @@
 import asyncio
 import json
 import argparse
+from datetime import datetime
 from pathlib import Path
 from typing import Dict
 
 from aiohttp import ClientSession
+from tqdm import tqdm
 
 
 async def get_status(
@@ -84,10 +86,14 @@ async def loop_execution_status(submission_map_fp: str):
     with open(submit_fp, "r") as f:
         submission_map = json.load(f)
 
+    num_submissions = len(submission_map)
+
     # we want to keep track of whether we are on the first loop to overwrite stdout
     first_loop = True
     # keep track of the number of previous lines, again for overwriting stdout
     prev_line_count = 0
+    prev_submissions = set()
+    pbar = tqdm(total=num_submissions, desc="Workflow status", unit=" workflows")
     while True:
         # get the status of all the workflows
         async with ClientSession() as session:
@@ -106,6 +112,12 @@ async def loop_execution_status(submission_map_fp: str):
             for k, v in d.items()
             if v.get("status") != "Succeeded" and v.get("status") != "Failed"
         }
+
+        iteration_submissions = set(status_dict.keys())
+        pbar.update(num_submissions - len(status_dict))
+        finished_submissions = list(prev_submissions.difference(iteration_submissions))
+        if len(finished_submissions) > 0:
+            pbar.write(f"Finished workflows: {finished_submissions} at {datetime.now()}")
 
         # break if there are no more workflows that have not "succeeded" or "failed"
         if len(status_dict) == 0:
