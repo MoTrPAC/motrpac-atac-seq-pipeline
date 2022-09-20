@@ -66,7 +66,7 @@ else
   gsutil -m cp -n "${CROO_OUTPUT_PATH}/*/*/align/rep?/*tagAlign.gz" tagalign
 
   # individual signal track (p-value)
-  gsutil -m cp -n "${CROO_OUTPUT_PATH}/*/*/signal/rep?/*pval.signal.bigwig signal"
+  gsutil -m cp -n "${CROO_OUTPUT_PATH}/*/*/signal/rep?/*pval.signal.bigwig" signal
 fi
 
 gs_copy() {
@@ -115,8 +115,8 @@ gs_copy_gcp() {
 
 if [[ "$copy_dest" == "gcp" ]]; then
   export -f gs_copy_gcp
-  parallel --verbose --jobs "$NUM_CORES" gs_copy_gcp ::: "$(gsutil ls "$CROO_OUTPUT_PATH" | grep -E "/$" | grep -v "final")"
+  parallel --progress --verbose --jobs "$NUM_CORES" gs_copy_gcp ::: "$(gsutil ls "$CROO_OUTPUT_PATH" | grep -E "/$" | grep -v "final")"
 else
   export -f gs_copy
-  parallel --verbose --jobs "$NUM_CORES" gs_copy ::: "$(gsutil ls "$CROO_OUTPUT_PATH" | grep -E "/$" | grep -v "final")"
+  parallel --progress --verbose --jobs "$NUM_CORES" gs_copy ::: "$(gsutil ls "$CROO_OUTPUT_PATH" | grep -E "/$" | grep -v "final")"
 fi

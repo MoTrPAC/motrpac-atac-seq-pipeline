@@ -69,12 +69,12 @@ align_stats() {
 export -f align_stats
 
 if [ "$type" == "glob" ]; then
-  parallel --verbose --jobs "$cores" align_stats ::: "$(ls "${bamdir%/}"/*/*/align/rep*/*.trim.bam)"
+  parallel --joblog ~/mnt/tmp/"$(basename bamdir)"_align_stats_concat_joblog.log --progress --verbose --jobs "$cores" align_stats ::: "$(ls "${bamdir%/}"/*/*/align/rep*/*_R1.trim.bam)"
 elif [ "$type" == "file" ]; then
   readarray -t raw_bam_list <<<"$bamdir"
-  parallel --verbose --jobs "$cores" align_stats ::: "${raw_bam_list[@]}"
+  parallel --joblog ~/mnt/tmp/"$(basename bamdir)"_align_stats_concat_joblog.log --progress --verbose --jobs "$cores" align_stats ::: "${raw_bam_list[@]}"
 elif [ "$type" == "find" ]; then
-  parallel --verbose --jobs "$cores" align_stats ::: "$(find -name "*_R1.trim.bam" "$bamdir")"
+  parallel --joblog ~/mnt/tmp/"$(basename bamdir)"_align_stats_concat_joblog.log --progress --verbose --jobs "$cores" align_stats ::: "$(find -name "*_R1.trim.bam" "$bamdir")"
 else
   echo "type must be glob, file, or find"
   exit 1
