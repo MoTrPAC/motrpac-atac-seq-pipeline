@@ -1,0 +1,18 @@
+Index: atac-seq-pipeline/atac.wdl
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/atac-seq-pipeline/atac.wdl b/atac-seq-pipeline/atac.wdl
+--- a/atac-seq-pipeline/atac.wdl	(revision 46f2a928db20ca4889160b6e2a2e980fac34d672)
++++ b/atac-seq-pipeline/atac.wdl	(date 1663706161074)
+@@ -1990,5 +1990,9 @@
+ 	}
+ 	runtime {
+ 		maxRetries : 0
++		cpu : 1
++		memory : '2 GB'
++		time : 1
++		disks : 'local-disk 10 SSD'
+ 	}
+ }
