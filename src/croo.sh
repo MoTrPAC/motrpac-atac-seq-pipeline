@@ -9,7 +9,7 @@ if [ $# -lt 3 ]; then
   echd
   echo "Example: croo.sh out.json gs://my-bucket/my_workflow/outputs/croo gs://my-bucket/my_workflow/processed"
   echo
-  echo "[WORKFLOW_SUBMISSION_MAP]: A list of workflow ids to process"
+  echo "[WORKFLOW_SUBMISSION_MAP]: A JSON of workflow ids to process"
   echo "[GCP_PATH]: This directory with the outputs of the pipeline"
   echo "[OUT_PATH]: The location to output the croo files to"
   echo "[PARSE_FROM_ID_LIST] (Optional): Whether to use the workflow id list to parse the files to copy. If false/not set will use qc json to create a file name"

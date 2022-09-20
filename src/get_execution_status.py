@@ -94,6 +94,7 @@ async def loop_execution_status(submission_map_fp: str):
     prev_line_count = 0
     prev_submissions = set()
     pbar = tqdm(total=num_submissions, desc="Workflow status", unit=" workflows")
+
     while True:
         # get the status of all the workflows
         async with ClientSession() as session:
@@ -146,9 +147,6 @@ async def loop_execution_status(submission_map_fp: str):
         }
 
         fmt_status_dict = json.dumps(sorted_status_dict, indent=4)
-
-        with open(f"{submit_fp.stem}_status.json", "w") as f:
-            json.dump(sorted_status_dict, f, indent=4)
 
         # we want to erase what we wrote previously by sending the escape sequence
         # the number of times we wrote to stdout previously

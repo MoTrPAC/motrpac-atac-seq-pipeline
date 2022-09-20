@@ -2,10 +2,9 @@
 
 if [ $# -lt 4 ]; then
   echo
-  echo "Usage: ./submit.sh [PYTHON_LOCATION] [WDL_FILE] [JSON_DIR] [WF_ID_MAP]"
+  echo "Usage: ./submit.sh [WDL_FILE] [JSON_DIR] [WF_ID_MAP]"
   echo
-  echo "Example: ./submit.sh \$(which python) atac.wdl json/ wfids.json"
-  echo "[PYTHON_LOCATION]: The python with caper installed"
+  echo "Example: ./submit.sh atac.wdl json/ wfids.json"
   echo "[WDL_FILE]: the WDL file to use as the workflow"
   echo "[JSON_DIR]: the directory containing JSON files to use as the WDL inputs"
   echo "[WF_ID_MAP]: a JSON file to write an array of a map of label and workflow ID of the submitted jobs to"
@@ -13,7 +12,6 @@ if [ $# -lt 4 ]; then
   exit 1
 fi
 
-PYTHON=$1
 WDL_FILE=$2
 JSON_DIR=${3/%\//}
 WF_ID_MAP=$4
@@ -23,7 +21,7 @@ if ! [ -f "$WDL_FILE" ]; then
   echo "$WDL_FILE does not exist"
 fi
 
-if ! $PYTHON -c 'import caper' &>/dev/null; then
+if ! python -c 'import caper' &>/dev/null; then
   echo "caper not installed" >&2
   exit 1
 fi
@@ -49,7 +47,6 @@ function submit_file() {
 }
 
 export -f submit_file
-export PYTHON
 export WDL_FILE
 export WF_ID_MAP
 echo "Submitting files in $JSON_DIR"
