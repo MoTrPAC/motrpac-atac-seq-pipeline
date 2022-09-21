@@ -18,34 +18,77 @@ CROMWELL_LOC_DIR="gs://mihir-test/pipelines/loc"
 REMOTE_KEY_FILE=~/.keys/service_account_key.json
 ###
 
-
 #### Script ####
 echo "Installing dependencies..."
-sudo add-apt-repository ppa:deadsnakes/ppa
 sudo apt-get update
-sudo apt-get install -y curl wget jq parallel git python3.10 acl tmux
-sudo apt-key adv \
-  --keyserver hkp://keyserver.ubuntu.com:80 \
-  --recv-keys 0xB1998361219BD9C9
-curl -O https://cdn.azul.com/zulu/bin/zulu-repo_1.0.0-3_all.deb
-sudo apt-get install ./zulu-repo_1.0.0-3_all.deb
-sudo apt-get update
-sudo apt-get install zulu11-jdk
-rm zulu-repo_1.0.0-3_all.deb
+sudo apt-get install -y curl wget jq parallel git acl tmux make build-essential \
+  libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev llvm libncursesw5-dev \
+  xz-utils tk-dev libxml2-dev libxmlsec1-dev libffi-dev liblzma-dev
+
+if ! command -v pyenv &>/dev/null; then
+  curl -L https://github.com/pyenv/pyenv-installer/raw/master/bin/pyenv-installer | bash
+
+  echo """
+export PYENV_ROOT=\"\$HOME/.pyenv\"
+command -v pyenv >/dev/null || export PATH=\"\$PYENV_ROOT/bin:\$PATH\"
+eval \"\$(pyenv init --path)\"
+eval \"\$(pyenv init -)\"
+eval \"\$(pyenv virtualenv-init -)\"
+""" >>~/.bashrc
+
+  echo """
+export PYENV_ROOT=\"\$HOME/.pyenv\"
+command -v pyenv >/dev/null || export PATH=\"\$PYENV_ROOT/bin:\$PATH\"
+eval \"\$(pyenv init --path)\"
+eval \"\$(pyenv init -)\"
+eval \"\$(pyenv virtualenv-init -)\"
+""" >>~/.profile
+
+  export PYENV_ROOT="$HOME/.pyenv"
+  export PATH="$PYENV_ROOT/bin:$PATH"
+  eval "$(pyenv init --path)"
+  eval "$(pyenv init -)"
+  eval "$(pyenv virtualenv-init -)"
+
+  pyenv update
+fi
+
+ver=$(python -c "import sys;t='{v[0]}{v[1]}'.format(v=list(sys.version_info[:2]));sys.stdout.write(t)")
+
+if [[ "$ver" != "310" ]]; then
+  pyenv install 3.10.7
+fi
+
+pyenv global 3.10.7
+
+if ! command -v java &>/dev/null; then
+  sudo apt-key adv -y \
+    --keyserver hkp://keyserver.ubuntu.com:80 \
+    --recv-keys 0xB1998361219BD9C9
+  curl -O https://cdn.azul.com/zulu/bin/zulu-repo_1.0.0-3_all.deb
+  sudo apt-get install -y ./zulu-repo_1.0.0-3_all.deb
+  sudo apt-get update
+  sudo apt-get install -y zulu11-jdk
+  rm zulu-repo_1.0.0-3_all.deb
+fi
 
 echo "Installing Python requirements..."
-pip install -r requirements.txt
+python3 -m pip install -r requirements.txt
 
-echo "Installing Docker"
-curl -fsSL https://get.docker.com -o get-docker.sh
-sudo sh get-docker.sh
-sudo groupadd docker
-sudo usermod -aG docker $USER
-newgrp docker
+if ! command -v docker &>/dev/null; then
+  echo "Installing Docker"
+  curl -fsSL https://get.docker.com -o get-docker.sh
+  sudo sh get-docker.sh
+  sudo getent group docker || sudo groupadd docker
+  sudo usermod -aG docker "$USER"
+  newgrp docker
+fi
 
-echo "Cloning ENCODE ATAC-seq pipeline..."
-git clone --single-branch --branch v1.7.0 https://github.com/ENCODE-DCC/atac-seq-pipeline.git
-git apply patches/fix__add_missing_runtime_attributes_to_atac-seq_v1_7_0.patch
+if [ ! -d "atac-seq-pipeline" ]; then
+  echo "Cloning ENCODE ATAC-seq pipeline..."
+  git clone --single-branch --branch v1.7.0 https://github.com/ENCODE-DCC/atac-seq-pipeline.git
+  git apply patches/fix__add_missing_runtime_attributes_to_atac-seq_v1_7_0.patch
+fi
 
 echo "Configuring caper..."
 CAPER_CONF_DIR=/opt/caper
@@ -59,7 +102,7 @@ sudo setfacl -R -d -m g::rwX $CAPER_CONF_DIR
 sudo setfacl -R -d -m o::rwX $CAPER_CONF_DIR
 
 # create the config file
-cat <<EOF > "/opt/caper/default.conf"
+cat <<EOF >"/opt/caper/default.conf"
 # caper
 backend=gcp
 no-server-heartbeat=True
@@ -87,15 +130,17 @@ EOF
 sudo chmod +r "/opt/caper/default.conf"
 
 echo "Creating MySQL database..."
-DB_DIR=~/.caper/db
-INIT_DB_DIR=~/.caper/init_db
-sudo mkdir -p $DB_DIR $INIT_DB_DIR
+DB_DIR=$HOME/.caper/db
+INIT_DB_DIR=$HOME/.caper/init_db
+mkdir -p "$DB_DIR" "$INIT_DB_DIR"
+sudo chown -R "$USER" "$DB_DIR" "$INIT_DB_DIR"
+sudo chmod 777 -R "$DB_DIR" "$INIT_DB_DIR"
 
 INIT_SQL="""
 CREATE USER 'cromwell'@'%' IDENTIFIED BY 'cromwell';
 GRANT ALL PRIVILEGES ON cromwell.* TO 'cromwell'@'%' WITH GRANT OPTION;
 """
-echo "${INIT_SQL}" > $INIT_DB_DIR/init_cromwell_user.sql
+echo "${INIT_SQL}" >"$INIT_DB_DIR"/init_cromwell_user.sql
 
 docker run -d --rm \
   --name mysql \
@@ -110,17 +155,16 @@ CONTAINER_DB_PORT=3306
 is_mysql_alive() {
   docker exec -it mysql \
     mysqladmin ping \
-      --user=cromwell \
-      --password=cromwell \
-      --host=$CONTAINER_DB_HOST \
-      --port=$CONTAINER_DB_PORT \
-    > /dev/null
+    --user=cromwell \
+    --password=cromwell \
+    --host=$CONTAINER_DB_HOST \
+    --port=$CONTAINER_DB_PORT \
+    >/dev/null
   returned_value=$?
   echo ${returned_value}
 }
 
-until [ "$(is_mysql_alive)" -eq 0 ]
-do
+until [ "$(is_mysql_alive)" -eq 0 ]; do
   sleep 5
   echo "Waiting for MySQL container to be ready..."
 done

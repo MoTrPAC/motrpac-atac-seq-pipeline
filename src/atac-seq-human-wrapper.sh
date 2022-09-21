@@ -31,7 +31,7 @@ MOUNT_DIR=~/mnt/
 LOCAL_ATAC_OUT_DIR=${ATAC_OUTPUT_DIR#"gs://"}
 
 #### Script ####
-if [ ! "$(docker ps -q -f name=${CONTAINER_NAME})" ]; then
+if [ ! "$(docker ps -q -f name="${CONTAINER_NAME}")" ]; then
   echo "MySQL container does not exist, creating Docker container"
 
   echo "Creating MySQL database..."
