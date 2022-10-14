@@ -7,6 +7,10 @@
 run_dir=$1
 out_gcp_path=$2
 
+random_string=$(openssl rand -hex 8)
+mkdir "$random_string"
+cd "$random_string" || exit
+
 for dir in $(gsutil ls ${run_dir}); do
 	# get condition name
 	gsutil cp $(gsutil ls ${dir}call-qc_report/glob*/qc.json) .
@@ -33,5 +37,6 @@ done
 
 #copy outputs to gcp and delete the local copies
 gsutil -m cp -r rep_to_sample_map.csv ${out_gcp_path}/
-rm -rf rep_to_sample_map.csv
-rm -rf qc.json
+
+cd ..
+rm -rf "$random_string"

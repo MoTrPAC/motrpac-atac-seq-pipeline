@@ -26,6 +26,7 @@ fi
 
 #module load samtools
 
+cwd=$(pwd)
 cd "$indir"
 mkdir -p idxstats # make outdir
 
@@ -100,3 +101,5 @@ fi
 #head -1 $(find -name "*_chrinfo.csv" | head -1) > merged_chr_info.csv
 #for file in $(find -name "*_chrinfo.csv"); do sed -e '1d' $file >> merged_chr_info.csv; done
 cat idxstats/*_chrinfo.csv | grep -v "^viallabel" | sed '1iviallabel,total_primary_alignments,pct_chrX,pct_chrY,pct_chrM,pct_auto,pct_contig' >merged_chr_info.csv
+cd "$cwd" || exit 1
+

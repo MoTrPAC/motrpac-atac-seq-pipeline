@@ -1,10 +1,11 @@
 #!/bin/bash
+
 # Nicole Gay, modified by Archana to work on copying outputs to GCP and locally
 # 6 May 2020
 #
 # description: copy necessary outputs from GCP to final destination on GCP or local cluster
 #
-# Usage: bash pass_extract_atac_from_gcp.sh ${NUM_CORES} ${CROO_OUTPUT_PATH} ${DOWNLOAD_DIR}
+# Usage: bash pass_extract_atac_from_gcp.sh ${NUM_CORES} ${DOWNLOAD_DIR_without_trailing_slash} ${gcp_path_to_atac_croo_outputs_without_trailing_slash} ${copy_dest}
 #
 ### Expected numbers of files:
 ##
@@ -77,12 +78,12 @@ gs_copy() {
   condition=$(basename "${subdir%/}")
 
   # merged peak file
-  gsutil cp -n "${subdir}peak/overlap_reproducibility/overlap.optimal_peak.narrowPeak.gz" "peak/${condition}.overlap.optimal_peak.narrowPeak.gz"
-  gsutil cp -n "${subdir}peak/overlap_reproducibility/overlap.optimal_peak.narrowPeak.hammock.gz" "peak/${condition}.overlap.optimal_peak.narrowPeak.hammock.gz"
+  gsutil cp -n "${subdir}peak/overlap_reproducibility/overlap.optimal_peak.narrowPeak.gz peak/${condition}.overlap.optimal_peak.narrowPeak.gz"
+  gsutil cp -n "${subdir}peak/overlap_reproducibility/overlap.optimal_peak.narrowPeak.hammock.gz peak/${condition}.overlap.optimal_peak.narrowPeak.hammock.gz"
 
   # pooled signal track
   if [[ $condition != *"GET-STDRef-Set"* ]]; then
-    gsutil cp -n "${subdir}signal/pooled-rep/basename_prefix.pooled.pval.signal.bigwig" "signal/${condition}.pooled.pval.signal.bigwig"
+    gsutil cp -n "${subdir}signal/pooled-rep/basename_prefix.pooled.pval.signal.bigwig signal/${condition}.pooled.pval.signal.bigwig"
   fi
 
   # qc.html

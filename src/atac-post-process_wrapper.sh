@@ -24,7 +24,7 @@ num_cores=12
 
 #get replicates to sample mapping file
 
-python3 src/encode_rep_names_from_croo.py ${croo_output_path} ${download_dir}/ ${batch_wfids} ${gcp_project}
+python3 src/encode_rep_names_from_croo.py ${croo_output_path} ${download_dir}/ ${batch_wfids} ~/mnt/rna-seq_araja/atac-seq/wfids/${batch_wfids} ${gcp_project}
 
 #bash src/extract_rep_names_from_encode.sh ${pipeline_output_path}/ ${download_dir}/
 echo "Success! Done creation of sample mapping file"
