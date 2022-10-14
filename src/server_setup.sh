@@ -26,6 +26,13 @@ sudo apt-get install -y curl wget jq parallel git acl tmux make build-essential 
   xz-utils tk-dev libxml2-dev libxmlsec1-dev libffi-dev liblzma-dev \
   autoconf automake gcc perl libcurl4-gnutls-dev libncurses5-dev
 
+sudo apt-add-repository ppa:fish-shell/release-3
+sudo add-apt-repository ppa:neovim-ppa/stable
+sudo apt update
+sudo apt install fish neovim
+
+curl https://raw.githubusercontent.com/oh-my-fish/oh-my-fish/master/bin/install | fish
+
 if ! command -v pyenv &>/dev/null; then
   curl -L https://github.com/pyenv/pyenv-installer/raw/master/bin/pyenv-installer | bash
 
@@ -51,6 +58,10 @@ eval \"\$(pyenv virtualenv-init -)\"
   eval "$(pyenv init -)"
   eval "$(pyenv virtualenv-init -)"
 
+  fish -c "set -Ux PYENV_ROOT \$HOME/.pyenv"
+  fish -c "fish_add_path \$PYENV_ROOT/bin"
+  echo "pyenv init - | source" >> ~/.config/fish/config.fish
+
   pyenv update
 fi
 
@@ -73,8 +84,26 @@ if ! command -v java &>/dev/null; then
   rm zulu-repo_1.0.0-3_all.deb
 fi
 
+if ! command -v Rscript &>/dev/null; then
+  # update indices
+  sudo apt update -qq
+  # install two helper packages we need
+  sudo apt install --no-install-recommends software-properties-common dirmngr
+  # add the signing key (by Michael Rutter) for these repos
+  # To verify key, run gpg --show-keys /etc/apt/trusted.gpg.d/cran_ubuntu_key.asc
+  # Fingerprint: E298A3A825C0D65DFD57CBB651716619E084DAB9
+  wget -qO- https://cloud.r-project.org/bin/linux/ubuntu/marutter_pubkey.asc | sudo tee -a /etc/apt/trusted.gpg.d/cran_ubuntu_key.asc
+  # add the R 4.0 repo from CRAN -- adjust 'focal' to 'groovy' or 'bionic' as needed
+  sudo add-apt-repository "deb https://cloud.r-project.org/bin/linux/ubuntu $(lsb_release -cs)-cran40/"
+  sudo apt install --no-install-recommends r-base
+fi
+
 echo "Installing Python requirements..."
 python3 -m pip install -r requirements.txt
+python3 -m pip install qc2tsv croo
+
+echo "Installing R requirements..."
+Rscript -e "install.packages(c('BiocManager', 'devtools', 'data.table', 'optparse'), repos = 'http://cran.us.r-project.org')"
 
 if ! command -v docker &>/dev/null; then
   echo "Installing Docker"
@@ -191,3 +220,10 @@ make
 sudo make install
 cd ..
 rm -rf samtools-1.16.1 samtools.tar.bz2
+
+echo "Downloading and setting up bigWigToBedGraph..."
+wget -q https://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64/bigWigToBedGraph -O bigWigToBedGraph
+sudo mv bigWigToBedGraph /usr/local/bin
+sudo chmod a+x /usr/local/bin/bigWigToBedGraph
+
+echo "Finished"
