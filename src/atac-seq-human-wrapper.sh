@@ -110,10 +110,6 @@ bash src/qc2tsv.sh $ATAC_OUTPUT_DIR/croo "$MOUNT_DIR"/"$GCS_BUCKET"/qc/"$BATCH_P
 echo "Copying files for quantification..."
 bash src/pass_extract_atac_from_gcp.sh $NUM_CORES $ATAC_OUTPUT_DIR/croo $ATAC_OUTPUT_DIR/
 
-echo "Downloading and setting up gcsfuse..."
-wget -q https://github.com/GoogleCloudPlatform/gcsfuse/releases/download/v0.41.6/gcsfuse_0.41.6_amd64.deb
-sudo dpkg -i gcsfuse_0.41.6_amd64.deb
-
 # run samtools to generate genome alignment stats
 echo "Generating alignment stats..."
 bash src/align_stats.sh $NUM_CORES ~/"$MOUNT_DIR"/$LOCAL_ATAC_OUT_DIR ~/"$MOUNT_DIR"/$LOCAL_ATAC_OUT_DIR/croo
@@ -121,3 +117,8 @@ bash src/align_stats.sh $NUM_CORES ~/"$MOUNT_DIR"/$LOCAL_ATAC_OUT_DIR ~/"$MOUNT_
 # Create final qc report merging the metadata and workflow qc scores
 echo "Generating merged qc reports..."
 Rscript src/merge_atac_qc_human.R -w ~/"$MOUNT_DIR"/$LOCAL_ATAC_OUT_DIR/$SAMPLE_METADATA_FILENAME -q ~/"$MOUNT_DIR"/$LOCAL_ATAC_OUT_DIR/qc/"$BATCH_PREFIX"_qc.tsv -a ~/"$MOUNT_DIR"/$LOCAL_ATAC_OUT_DIR/merged_chr_info.csv -o ~/"$MOUNT_DIR"/${ATAC_OUTPUT_DIR#"gs://"}/
+
+echo "Generating sample counts matri
+bash src/encode_to_count_matrix_human.sh $ATAC_OUTPUT_DIR "$(pwd)"/src/ $NUM_CORES
+
+echo "Done!"

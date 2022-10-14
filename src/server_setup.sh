@@ -23,7 +23,8 @@ echo "Installing dependencies..."
 sudo apt-get update
 sudo apt-get install -y curl wget jq parallel git acl tmux make build-essential \
   libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev llvm libncursesw5-dev \
-  xz-utils tk-dev libxml2-dev libxmlsec1-dev libffi-dev liblzma-dev
+  xz-utils tk-dev libxml2-dev libxmlsec1-dev libffi-dev liblzma-dev \
+  autoconf automake gcc perl libcurl4-gnutls-dev libncurses5-dev
 
 if ! command -v pyenv &>/dev/null; then
   curl -L https://github.com/pyenv/pyenv-installer/raw/master/bin/pyenv-installer | bash
@@ -171,3 +172,22 @@ done
 
 gcloud auth activate-service-account --key-file="$REMOTE_KEY_FILE"
 export GOOGLE_APPLICATION_CREDENTIALS="$REMOTE_KEY_FILE"
+
+echo "Downloading and setting up gcsfuse..."
+wget -q https://github.com/GoogleCloudPlatform/gcsfuse/releases/download/v0.41.7/gcsfuse_0.41.6_amd64.deb
+sudo dpkg -i gcsfuse_0.41.6_amd64.deb
+
+echo "Downloading and setting up bedtools and samtools..."
+wget -q https://github.com/arq5x/bedtools2/releases/download/v2.30.0/bedtools.static.binary -O bedtools
+sudo mv bedtools /usr/local/bin
+sudo chmod a+x /usr/local/bin/bedtools
+
+wget -q https://github.com/samtools/samtools/releases/download/1.16.1/samtools-1.16.1.tar.bz2 -O samtools.tar.bz2
+
+tar -xjf samtools.tar.bz2
+cd samtools-1.16.1
+./configure
+make
+sudo make install
+cd ..
+rm -rf samtools-1.16.1 samtools.tar.bz2
