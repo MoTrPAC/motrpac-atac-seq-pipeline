@@ -72,7 +72,7 @@ for (col in cols) {
   print(col)
   t1 <- encode[1, get(col)]
   for (i in seq_len(nrow(encode))) {
-    if (as.character(encode[i, get(col)]) == '') {
+    if (is.na(encode[i, get(col)]) | as.character(encode[i, get(col)]) == '') {
       encode[i, (col) := t1]
     } else {
       t1 <- encode[i, get(col)]

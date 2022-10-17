@@ -24,14 +24,12 @@ sudo apt-get update
 sudo apt-get install -y curl wget jq parallel git acl tmux make build-essential \
   libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev llvm libncursesw5-dev \
   xz-utils tk-dev libxml2-dev libxmlsec1-dev libffi-dev liblzma-dev \
-  autoconf automake gcc perl libcurl4-gnutls-dev libncurses5-dev
+  autoconf automake gcc perl libcurl4-gnutls-dev libncurses5-dev software-properties-common dirmngr
 
-sudo apt-add-repository ppa:fish-shell/release-3
-sudo add-apt-repository ppa:neovim-ppa/stable
+sudo apt-add-repository -y ppa:fish-shell/release-3
+sudo add-apt-repository -y ppa:neovim-ppa/stable
 sudo apt update
-sudo apt install fish neovim
-
-curl https://raw.githubusercontent.com/oh-my-fish/oh-my-fish/master/bin/install | fish
+sudo apt install -y fish neovim
 
 if ! command -v pyenv &>/dev/null; then
   curl -L https://github.com/pyenv/pyenv-installer/raw/master/bin/pyenv-installer | bash
@@ -65,7 +63,7 @@ eval \"\$(pyenv virtualenv-init -)\"
   pyenv update
 fi
 
-ver=$(python -c "import sys;t='{v[0]}{v[1]}'.format(v=list(sys.version_info[:2]));sys.stdout.write(t)")
+ver=$(python3 -c "import sys;t='{v[0]}{v[1]}'.format(v=list(sys.version_info[:2]));sys.stdout.write(t)")
 
 if [[ "$ver" != "310" ]]; then
   pyenv install 3.10.7
@@ -74,9 +72,7 @@ fi
 pyenv global 3.10.7
 
 if ! command -v java &>/dev/null; then
-  sudo apt-key adv -y \
-    --keyserver hkp://keyserver.ubuntu.com:80 \
-    --recv-keys 0xB1998361219BD9C9
+  sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 0xB1998361219BD9C9
   curl -O https://cdn.azul.com/zulu/bin/zulu-repo_1.0.0-3_all.deb
   sudo apt-get install -y ./zulu-repo_1.0.0-3_all.deb
   sudo apt-get update
@@ -88,22 +84,23 @@ if ! command -v Rscript &>/dev/null; then
   # update indices
   sudo apt update -qq
   # install two helper packages we need
-  sudo apt install --no-install-recommends software-properties-common dirmngr
   # add the signing key (by Michael Rutter) for these repos
   # To verify key, run gpg --show-keys /etc/apt/trusted.gpg.d/cran_ubuntu_key.asc
   # Fingerprint: E298A3A825C0D65DFD57CBB651716619E084DAB9
   wget -qO- https://cloud.r-project.org/bin/linux/ubuntu/marutter_pubkey.asc | sudo tee -a /etc/apt/trusted.gpg.d/cran_ubuntu_key.asc
   # add the R 4.0 repo from CRAN -- adjust 'focal' to 'groovy' or 'bionic' as needed
   sudo add-apt-repository "deb https://cloud.r-project.org/bin/linux/ubuntu $(lsb_release -cs)-cran40/"
-  sudo apt install --no-install-recommends r-base
+  sudo apt install -y r-base
+  sudo chmod 777 /usr/local/lib/R/site-library
 fi
 
 echo "Installing Python requirements..."
+python3 -m pip install --upgrade pip setuptools wheel
 python3 -m pip install -r requirements.txt
 python3 -m pip install qc2tsv croo
 
 echo "Installing R requirements..."
-Rscript -e "install.packages(c('BiocManager', 'devtools', 'data.table', 'optparse'), repos = 'http://cran.us.r-project.org')"
+Rscript -e "install.packages(c('data.table', 'optparse'), repos = 'http://cran.us.r-project.org')"
 
 if ! command -v docker &>/dev/null; then
   echo "Installing Docker"
@@ -203,7 +200,7 @@ gcloud auth activate-service-account --key-file="$REMOTE_KEY_FILE"
 export GOOGLE_APPLICATION_CREDENTIALS="$REMOTE_KEY_FILE"
 
 echo "Downloading and setting up gcsfuse..."
-wget -q https://github.com/GoogleCloudPlatform/gcsfuse/releases/download/v0.41.7/gcsfuse_0.41.6_amd64.deb
+wget -q https://github.com/GoogleCloudPlatform/gcsfuse/releases/download/v0.41.7/gcsfuse_0.41.7_amd64.deb
 sudo dpkg -i gcsfuse_0.41.6_amd64.deb
 
 echo "Downloading and setting up bedtools and samtools..."
@@ -227,3 +224,5 @@ sudo mv bigWigToBedGraph /usr/local/bin
 sudo chmod a+x /usr/local/bin/bigWigToBedGraph
 
 echo "Finished"
+
+curl https://raw.githubusercontent.com/oh-my-fish/oh-my-fish/master/bin/install | fish
