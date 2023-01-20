@@ -38,7 +38,7 @@ align_stats() {
   viallabel=$(basename "$bam" | sed "s/_R1.*//")
   echo "$viallabel"
 
-  if [ -f idxstats/"${viallabel}"_chrinfo.txt ]; then
+  if [ -f idxstats/"${viallabel}"_chrinfo.txt ] && samtools quickcheck "$bam" 2&> /dev/null ; then
     echo "Skipping $viallabel"
     return
   fi
