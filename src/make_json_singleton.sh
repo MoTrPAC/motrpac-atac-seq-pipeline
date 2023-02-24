@@ -3,14 +3,14 @@
 # Write JSON files for ENCODE ATAC pipeline input
 # Assumes that reads are paired-end
 
-set -eux
+set -eu
 
 if [ $# -lt 3 ]; then
   echo "Usage: ./make_json.sh [JSON_BASE] [FASTQ_DIR] [JSON_DIR]"
-  echd
+  echo
   echo "Example: make_json.sh base.json /home/user/fastq jsons"
   echo
-  echo "[JSON_BASE]: The base JSON file to use4"
+  echo "[JSON_BASE]: The base JSON file to use"
   echo "[FASTQ_DIR]: This directory with raw FASTQ files"
   echo "[JSON_DIR]: The directory to output the JSON files to"
   echo
@@ -39,13 +39,13 @@ create_sample_json() {
   # name JSON file from FASTQ sample name
   json_file=$JSON_DIR/$(basename "$sample").json
 
-  printf "{\n    \"atac.title\" : \"%s\",\n" "$sample" >"$json_file"
+  printf "{\n    \"atac.description\": \"%s\",\n" "$(basename "$sample")" >"$json_file"
 
   # standard parameters for this project
   cat "$JSON_BASE" >>"$json_file"
 
   # add paths to FASTQ files
-  echo "    \"atac.fastqs_rep1_R1\" : [" >>"$json_file"
+  echo "    \"atac.fastqs_rep1_R1\": [" >>"$json_file"
 
   lanes=$($ls_command "$FASTQ_DIR" | grep "$sample" | grep -c "R1")
   counter=1
@@ -59,7 +59,7 @@ create_sample_json() {
   done
   printf "    ],\n" >>"$json_file"
 
-  echo "    \"atac.fastqs_rep1_R2\" : [" >>"$json_file"
+  echo "    \"atac.fastqs_rep1_R2\": [" >>"$json_file"
 
   counter=1
   for r2 in $($ls_command "$FASTQ_DIR" | grep "$sample" | grep "R2"); do
