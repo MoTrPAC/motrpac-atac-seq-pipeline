@@ -90,11 +90,9 @@ for i in `cat ${batch_file}`;do
 	tag_align=$(ls ${indir}/$i/Output/final/tagalign/*tagAlign.gz)
 	echo ${tag_align}
 	echo ${final_results_dir}
-	parallel --verbose --jobs ${cores} intersect_tag ::: $(echo ${tag_align})
+	parallel --verbose --progress --bar --jobs ${cores} intersect_tag ::: $(echo ${tag_align})
 done
 
-#tag_align=$(find -path "./tagalign/*tagAlign.gz")
-#parallel --verbose --jobs ${cores} intersect_tag ::: $(echo ${tag_align}) 
 
 echo -e $'chrom\tstart\tend' > ${indir}/${final_results_dir}/index
 cat ${outdir}/overlap.optimal_peak.narrowPeak.200.sorted.merged.bed >> ${indir}/${final_results_dir}/index

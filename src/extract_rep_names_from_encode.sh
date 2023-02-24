@@ -38,7 +38,7 @@ function get_rep_names() {
 
 export -f get_rep_names
 
-parallel --progress --verbose --jobs 12 get_rep_names ::: $(gsutil ls ${RUN_DIR})
+parallel --progress --bar --verbose --jobs 12 get_rep_names ::: $(gsutil ls ${RUN_DIR})
 
 #copy outputs to gcp and delete the local copies
 gsutil -m cp -r rep_to_sample_map.csv ${OUT_GCP_PATH}/

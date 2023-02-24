@@ -67,7 +67,7 @@ export in_dir
 export -f intersect_tag
 
 # shellcheck disable=SC2046
-parallel --verbose --jobs "$cores" intersect_tag ::: $(ls "${in_dir}"/tagalign/*tagAlign.gz)
+parallel --verbose --progress --bar --jobs "$cores" intersect_tag ::: $(ls "${in_dir}"/tagalign/*tagAlign.gz)
 
 echo -e $'chrom\tstart\tend' >"${in_dir}/index"
 cat "${OUT_DIR}/overlap.optimal_peak.narrowPeak.200.sorted.merged.bed" >>"${in_dir}/index"

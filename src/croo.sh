@@ -58,7 +58,7 @@ export -f run_croo
 cores=10
 
 # shellcheck disable=SC2046
-parallel --joblog ~/mnt/tmp/"${WORKFLOW_SUBMISSION_MAP%%.*}"_croo.log --progress --verbose --jobs "$cores" run_croo ::: $(jq -r '.[].workflow_id' "$WORKFLOW_SUBMISSION_MAP")
+parallel --joblog ~/mnt/tmp/"${WORKFLOW_SUBMISSION_MAP%%.*}"_croo.log --progress --bar --verbose --jobs "$cores" run_croo ::: $(jq -r '.[].workflow_id' "$WORKFLOW_SUBMISSION_MAP")
 
 #for line in $(jq -r '.[].workflow_id' "$WORKFLOW_SUBMISSION_MAP"); do
 #  run_croo "$line"

@@ -114,8 +114,8 @@ gs_copy_gcp() {
 
 if [[ "$copy_dest" == "gcp" ]]; then
   export -f gs_copy_gcp
-  parallel --progress --verbose --jobs "$NUM_CORES" gs_copy_gcp ::: "$(gsutil ls "$CROO_OUTPUT_PATH" | grep -E "/$" | grep -v "final")"
+  parallel --progress --bar --verbose --jobs "$NUM_CORES" gs_copy_gcp ::: "$(gsutil ls "$CROO_OUTPUT_PATH" | grep -E "/$" | grep -v "final")"
 else
   export -f gs_copy
-  parallel --progress --verbose --jobs "$NUM_CORES" gs_copy ::: "$(gsutil ls "$CROO_OUTPUT_PATH" | grep -E "/$" | grep -v "final")"
+  parallel --progress --bar --verbose --jobs "$NUM_CORES" gs_copy ::: "$(gsutil ls "$CROO_OUTPUT_PATH" | grep -E "/$" | grep -v "final")"
 fi

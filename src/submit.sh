@@ -51,7 +51,7 @@ export -f submit_file
 export WDL_FILE
 export WF_ID_MAP
 echo "Submitting files in $JSON_DIR"
-parallel --verbose --jobs "$NUM_CORES" submit_file ::: "$JSON_DIR"/*.json
+parallel --bar --progress --verbose --jobs "$NUM_CORES" submit_file ::: "$JSON_DIR"/*.json
 
 echo "]" >>"$WF_ID_MAP"
 
