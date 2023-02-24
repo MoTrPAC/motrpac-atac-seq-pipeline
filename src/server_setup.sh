@@ -5,17 +5,30 @@
 # working directory needs to be base directory (not src/)
 # USAGE: src/atac-seq-human-wrapper.sh
 ###
-
 set -eu
+
+if [ $# -lt 2 ]; then
+  echo "Usage: ./server_setup.sh [GCP_REGION] [GCP_PROJECT] [CROMWELL_OUT_DIR] [CROMWELL_LOC_DIR] [REMOTE_KEY_FILE]"
+  echd
+  echo "Example: bash server_setup.sh us-central1 my-project gs://my-bucket/out gs://my-bucket/loc ~/.keys/service_account_key.json"
+  echo
+  echo "[GCP_REGION]: The GCP region to run the pipeline in, must be compatible with the Google Life Sciences API"
+  echo "[GCP_PROJECT]: The project you are running the pipeline in"
+  echo "[CROMWELL_OUT_DIR]: The GCS bucket directory to store the cromwell output files in (with a prefix - gs://)"
+  echo "[CROMWELL_LOC_DIR]: The GCS bucket directory to store the cromwell localization files in (with a prefix - gs://)"
+  echo "[REMOTE_KEY_FILE]: The path to the service account key file on the remote machine"
+  echo
+  exit 1
+fi
 
 ### VARIABLES TO SET ###
 # set this to the region you want to run in (e.g. us-central1), the region should be compatible with life sciences API
-GCP_REGION="us-central1"
-GCP_PROJECT="motrpac-portal"
-CROMWELL_OUT_DIR="gs://mihir-test/pipelines/out"
-CROMWELL_LOC_DIR="gs://mihir-test/pipelines/loc"
+GCP_REGION=$1
+GCP_PROJECT=$2
+CROMWELL_OUT_DIR=$3
+CROMWELL_LOC_DIR=$4
 # you need to have a service account with access to the life sciences API on the VM
-REMOTE_KEY_FILE=~/.keys/service_account_key.json
+REMOTE_KEY_FILE=$5
 ###
 
 #### Script ####
@@ -65,19 +78,18 @@ fi
 
 ver=$(python3 -c "import sys;t='{v[0]}{v[1]}'.format(v=list(sys.version_info[:2]));sys.stdout.write(t)")
 
-if [[ "$ver" != "310" ]]; then
-  pyenv install 3.10.7
+if [[ "$ver" != "311" ]]; then
+  pyenv install 3.11.2
 fi
 
-pyenv global 3.10.7
+pyenv global 3.11.2
 
 if ! command -v java &>/dev/null; then
-  sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 0xB1998361219BD9C9
-  curl -O https://cdn.azul.com/zulu/bin/zulu-repo_1.0.0-3_all.deb
-  sudo apt-get install -y ./zulu-repo_1.0.0-3_all.deb
-  sudo apt-get update
-  sudo apt-get install -y zulu11-jdk
-  rm zulu-repo_1.0.0-3_all.deb
+  sudo apt install gnupg ca-certificates curl
+  curl -s https://repos.azul.com/azul-repo.key | sudo gpg --dearmor -o /usr/share/keyrings/azul.gpg
+  echo "deb [signed-by=/usr/share/keyrings/azul.gpg] https://repos.azul.com/zulu/deb stable main" | sudo tee /etc/apt/sources.list.d/zulu.list
+  sudo apt update
+  sudo apt install zulu17-jdk
 fi
 
 if ! command -v Rscript &>/dev/null; then
