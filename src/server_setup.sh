@@ -1,6 +1,5 @@
-#!/usr/bin/env bash
+#!/bin/bash
 # Wrapper script for running the ENCODE ATAC-seq pipeline
-
 ###
 # working directory needs to be base directory (not src/)
 # USAGE: src/atac-seq-human-wrapper.sh
@@ -64,7 +63,7 @@ eval \"\$(pyenv virtualenv-init -)\"
 """ >>~/.profile
 
   export PYENV_ROOT="$HOME/.pyenv"
-  export PATH="$PYENV_ROOT/bin:$PATH"
+  command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"
   eval "$(pyenv init --path)"
   eval "$(pyenv init -)"
   eval "$(pyenv virtualenv-init -)"
