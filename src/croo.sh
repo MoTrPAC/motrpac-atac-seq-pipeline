@@ -9,16 +9,16 @@ if [ $# -lt 3 ]; then
   echd
   echo "Example: croo.sh out.json gs://my-bucket/my_workflow/outputs/croo gs://my-bucket/my_workflow/processed"
   echo
-  echo "[WORKFLOW_SUBMISSION_MAP]: A JSON of workflow ids to process"
+  echo "[WORKFLOW_SUBMISSION_MAP]: A JSON array of workflow ids to process"
   echo "[GCP_PATH]: This directory with the outputs of the pipeline"
   echo "[OUT_PATH]: The location to output the croo files to"
-  echo "[PARSE_FROM_ID_LIST] (Optional): Whether to use the workflow id list to parse the files to copy. If false/not set will use qc json to create a file name"
+  echo "[PARSE_FROM_ID_LIST] (Optional): Whether to use the workflow id list to parse the files to copy. If false/not set will use QC json to create a folder name"
   echo
   exit 1
 fi
 
 WORKFLOW_SUBMISSION_MAP=$1
-GCP_PATH=$2
+GCP_PATH=${2%/}
 OUT_PATH=${3%/}
 PARSE_FROM_ID_LIST=$4
 
@@ -29,7 +29,7 @@ function run_croo() {
   local descrip
 
   sample_dir=$GCP_PATH/${line%/}
-  out_dir=${OUT_PATH%/}/${sample_dir#gs://}
+  out_dir=$OUT_PATH/${sample_dir#gs://}
 
   if [[ "$PARSE_FROM_ID_LIST" ]]; then
     out_dir="$out_dir"/$(jq -r '.[] | select(.workflow_id == "'"$line"'") | .label' "$WORKFLOW_SUBMISSION_MAP")
