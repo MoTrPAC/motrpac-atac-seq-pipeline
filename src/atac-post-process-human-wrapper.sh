@@ -46,9 +46,9 @@ bash src/align_stats.sh $NUM_CORES "$MOUNT_DIR"/$LOCAL_ATAC_OUT_DIR "$MOUNT_DIR"
 
 # Create final qc report merging the metadata and workflow qc scores
 echo "Generating merged qc reports..."
-Rscript src/merge_atac_qc_human.R -w "$MOUNT_DIR"/$LOCAL_ATAC_OUT_DIR/$SAMPLE_METADATA_FILENAME -q "$MOUNT_DIR"/$LOCAL_ATAC_OUT_DIR/qc/"$BATCH_PREFIX"_qc.tsv -a "$MOUNT_DIR"/$LOCAL_ATAC_OUT_DIR/merged_chr_info.csv -o "$MOUNT_DIR"/${ATAC_OUTPUT_DIR#"gs://"}/
+Rscript src/merge_atac_qc_human.R -w "$MOUNT_DIR/$LOCAL_ATAC_OUT_DIR/$SAMPLE_METADATA_FILENAME" -q "$MOUNT_DIR"/$LOCAL_ATAC_OUT_DIR/croo/final/qc/"$BATCH_PREFIX"_qc.tsv -a "$MOUNT_DIR"/$LOCAL_ATAC_OUT_DIR/merged_chr_info.csv -o "$MOUNT_DIR"/${ATAC_OUTPUT_DIR#"gs://"}/
 
 echo "Generating sample counts matrix..."
-bash src/encode_to_count_matrix_human.sh $ATAC_OUTPUT_DIR "$(pwd)"/src/ $NUM_CORES
+bash src/encode_to_count_matrix_human.sh "$MOUNT_DIR/$LOCAL_ATAC_OUT_DIR" "$(pwd)"/src/ $NUM_CORES
 
 echo "Done!"
