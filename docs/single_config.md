@@ -7,7 +7,7 @@ A configuration (config) file is a file in JSON format that specifies input para
 This tutorial walks you through the steps to quickly generate config files for a large number of samples with the same runtime parameters (e.g. memory requirements, reference genome).  
 
 You will need to define a few paths first: 
-1. `base_json`: A trucated JSON file with paramaters that are constant for all samples in this batch. Find an example [here](examples/base.json). `/path/to/genome.tsv` refers to the path to either `"motrpac_rn6.tsv"` or `"motrpac_hg38.tsv"` file generated in **Step 3**. Note that you **must** include the following parameters for consistency within MoTrPAC:
+1. `base_json`: A trucated JSON file with paramaters that are constant for all samples in this batch. Find an example [here](../examples/base.json). `/path/to/genome.tsv` refers to the path to either `"motrpac_rn6.tsv"` or `"motrpac_hg38.tsv"` file generated in **Step 3**. Note that you **must** include the following parameters for consistency within MoTrPAC:
 ```
     "atac.genome_tsv" : "/path/to/genome.tsv",
     "atac.paired_end" : true,
