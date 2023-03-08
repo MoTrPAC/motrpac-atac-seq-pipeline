@@ -4,11 +4,9 @@ set -Eeuxo pipefail
 # On gcp , make sure that the bucket containing the inputs is mounted before running the script
 ##############################################
 #Change the paths to USER DEFINED VARIABLES IN THIS SECTION ONLY BEFORE RUNNING THE SCRIPT
-pipeline_output_path=gs://rna-seq_araja/PASS/atac-seq/stanford/PASS1B/atac
 download_dir=gs://rna-seq_araja/PASS/atac-seq/stanford/batch8_20210113/Output/final
 croo_output_path=gs://rna-seq_araja/PASS/atac-seq/stanford/batch8_20210113/Output
 qc2tsv_report_name=atac_qc.tsv
-final_qc_report_name=merged_atac_qc.tsv
 indir=~/test_mnt/PASS/atac-seq/stanford
 in_mnt_dir=~/test_mnt/PASS/atac-seq/stanford/batch8_20210113/Output/final
 in_bam_dir=~/test_mnt/PASS/atac-seq/stanford/batch8_20210113/Output #path to raw unfiltered bam files
@@ -21,7 +19,6 @@ mode=0
 batch_count=1
 num_cores=12
 ##############################################
-
 #get replicates to sample mapping file
 
 python3 src/encode_rep_names_from_croo.py ${croo_output_path} ${download_dir}/ ${batch_wfids} ~/mnt/rna-seq_araja/atac-seq/wfids/${batch_wfids} ${gcp_project}
@@ -37,7 +34,7 @@ echo "Success! Done creation of qc2tsv report"
 
 # reorganize croo outputs for quantification
 
-bash src/pass_extract_atac_from_gcp.sh ${num_cores} ${croo_output_path} ${download_dir}
+bash src/extract_atac_from_gcp_pass.sh ${num_cores} ${croo_output_path} ${download_dir}
 
 echo "Success! Done copying files for quantification"
 

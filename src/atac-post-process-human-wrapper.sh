@@ -38,7 +38,7 @@ bash src/qc2tsv.sh $ATAC_OUTPUT_DIR/croo "$MOUNT_DIR"/"$GCS_BUCKET"/qc/"$BATCH_P
 
 # reorganize croo outputs for quantification
 echo "Copying files for quantification..."
-bash src/human_extract_atac_from_gcp.sh $NUM_CORES $ATAC_OUTPUT_DIR/ $ATAC_OUTPUT_DIR/croo
+bash src/extract_atac_from_gcp_human.sh $NUM_CORES $ATAC_OUTPUT_DIR/ $ATAC_OUTPUT_DIR/croo
 
 # run samtools to generate genome alignment stats
 echo "Generating alignment stats..."
