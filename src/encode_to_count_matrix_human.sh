@@ -37,7 +37,7 @@ mkdir -p "$OUT_DIR"
 cd "$in_dir"
 
 #concatenate peaks (narrowpeak.gz)
-cat "${in_dir}"/peak/*narrowPeak.gz >>"${OUT_DIR}/overlap.optimal_peak.narrowPeak.bed.gz"
+cat "${in_dir}"/croo/final/peak/*narrowPeak.gz >>"${OUT_DIR}/overlap.optimal_peak.narrowPeak.bed.gz"
 echo "Success! done concatenating peak files from all tissues"
 
 # concatenate peaks (narrowpeak.gz)
