@@ -230,13 +230,52 @@ task intersect_tag {
     input {
         File tagalign_file
         File merged_filtered_sorted_peaks
+
+        String label
     }
 
     command <<<
         VIAL_LABEL=$(basename ~{tagalign_file} | sed "s/_.*//")
         echo "$VIAL_LABEL" > counts.txt
-        bedtools coverage -nonamecheck -counts -a ~{merged_filtered_sorted_peaks} -b ~{tagalign_file} | cut -f4 >> counts.txt
+        bedtools coverage -nonamecheck -counts -a ~{merged_filtered_sorted_peaks} -b ~{tagalign_file} | cut -f4 >> ~{label}.counts.txt
     >>>
+
+    output {
+        File counts = "~{label}.counts.txt"
+    }
+
+    runtime {
+        docker: "us-docker.pkg.dev/motrpac-portal/motrpac-atac-seq/default:1.0.0"
+    }
+}
+
+task create_tissue_tag {
+    input {
+        File merged_filtered_sorted_peaks
+        Array[File] counts_files
+    }
+
+    command <<<
+        echo -e $'chrom\tstart\tend' > index
+        cat ~{merged_filtered_sorted_peaks} >> index
+
+        #split the results counts matrix by tissue
+        #to do : reimplement in python
+
+        echo ~{counts_files} | awk -F "." '{print $2}' | awk '{print substr($1,8,2)}' | cut -f1 | sort | uniq >> tmp_tids.txt
+
+        while IFS= read -r line; do
+            paste index counts.*"${line}"??.txt > "T${line}.atac.counts.txt"
+            gzip "T${line}.atac.counts.txt"
+        done < tmp_tids.txt
+
+        tar -czvf tissue_tag.tar.gz T*.atac.counts.txt.gz
+    >>>
+
+    output {
+        File tissue_tag = "tissue_tag.tar.gz"
+    }
+
 
     runtime {
         docker: "us-docker.pkg.dev/motrpac-portal/motrpac-atac-seq/default:1.0.0"
@@ -309,12 +348,24 @@ workflow atac_post_process {
             peak_files = extract_peak_from_gcp.overlap_peak
     }
 
-    scatter (tagalign_file in localize_inputs.tagalign_file) {
+    scatter (pair in zip(localize_inputs.tagalign_file, wf_id_map)) {
         call intersect_tag {
             input:
-                tagalign_file = tagalign_file,
+                tagalign_file = pair.left,
+                label = pair.right.label,
                 merged_filtered_sorted_peaks = merge_peaks.merged_filtered_sorted_peaks
         }
     }
 
+    call create_tissue_tag {
+        input:
+            merged_filtered_sorted_peaks = merge_peaks.merged_filtered_sorted_peaks,
+            counts_files = intersect_tag.counts
+    }
+
+    output {
+        File merged_atac_qc = merge_atac_qc.merged_atac_qc
+        File merged_filtered_sorted_peaks = merge_peaks.merged_filtered_sorted_peaks
+        File create_tissue_tag = create_tissue_tag.tissue_tag
+    }
 }
