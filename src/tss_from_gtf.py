@@ -1,3 +1,10 @@
+"""
+Extract transcription start sites from an Ensembl GTF. Used to create the TSS reference file used in 
+~/ATAC_PIPELINE/atac-seq-pipeline/scripts/build_genome_data.sh
+
+Usage: 
+    python tss_from_gtf.py <gtf.gz> <tss_outfile.gz>
+"""
 import gzip
 import re
 import sys
