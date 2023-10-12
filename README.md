@@ -297,6 +297,7 @@ elif [[ "${GENOME}" == "motrpac_rn6" ]]; then
   TSS="http://mitra.stanford.edu/montgomery/projects/motrpac/atac/SCG/motrpac_references/rn6_release96/Rattus_norvegicus.Rnor_6.0.96_protein_coding.tss.bed.gz"
   BLACKLIST=
 ```
+**NOTE:** The TSS reference file was generated from the Ensembl GTF using [this script](src/tss_from_gtf.py).
 
 Now run the script to build the custom genome database. Specify a destination directory and install the MoTrPAC rn6 reference with the following command. We recommend not to run this installer on a login node of your cluster. It will take >8GB memory and >2h time. 
 ```bash
