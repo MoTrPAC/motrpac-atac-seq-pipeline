@@ -39,16 +39,21 @@ with gzip.open(in_gtf, 'rb') as gtf, gzip.open(out_tss, 'wb') as out:
 			break
 
 		chrom = l[0]
-
+#		print (l[8])
 		gene_id = l[8].split(';')[0].split(' ')[1]
 		gene_id = re.sub("\"", "", gene_id)
+#		print (gene_id)
+		for i in(l[8].split(';')):
+			if "gene_biotype" in i :
+				gene_type=i.split(" ")[2]
+				gene_type = re.sub("\"", "", gene_type)
+				if not gene_type == 'protein_coding':
+					continue
+#				print (gene_type)
+				end = tss
+				start = int(tss) - 1
 
-		gene_type = l[8].split(';')[2].split(' ')[1]
-		if not gene_type == 'protein_coding':
-			continue
+				out.write('\t'.join([chrom, str(start), end, gene_id, '0', strand])+'\n')
 
-		end = tss
-		start = int(tss) - 1
 
-		out.write('\t'.join([chrom, str(start), end, gene_id, '0', strand])+'\n')
 
