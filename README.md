@@ -1,10 +1,12 @@
 # MoTrPAC ATAC-Seq QC and Analysis Pipeline
 
-This repository provides MoTrPAC-specific supplements to
-the [ENCODE ATAC-seq pipeline](https://github.com/ENCODE-DCC/atac-seq-pipeline). For additional details not directly
-related to running the ENCODE ATAC-seq pipeline or processing the results, see the most recent version of the MoTrPAC
-ATAC-seq QC and Analysis Pipeline MOP,
-available [here](https://docs.google.com/document/d/1vnB7ITAKnaZYc3v_FCdaDu3z-JXeDncRk5GnqzQVwRw/edit#heading=h.tjbixx8yyd33).
+[![DOI](https://zenodo.org/badge/221818534.svg)](https://zenodo.org/badge/latestdoi/221818534)
+
+This repository provides MoTrPAC-specific supplements to the [ENCODE ATAC-seq pipeline](https://github.com/ENCODE-DCC/atac-seq-pipeline). 
+
+For additional details not directly related to running the ENCODE ATAC-seq pipeline or processing the results, see the most 
+recent version of the MoTrPAC ATAC-seq QC and Analysis Pipeline MOP, available 
+[here](https://docs.google.com/document/d/1vnB7ITAKnaZYc3v_FCdaDu3z-JXeDncRk5GnqzQVwRw/edit#heading=h.tjbixx8yyd33). 
 
 This documentation is intended to help individuals who are preparing ATAC-seq data for submission to the BIC or
 processing pilot samples with the full pipeline. For simplicity, this documentation explains how to run the full
@@ -419,6 +421,7 @@ elif [[ "${GENOME}" == "motrpac_rn6" ]]; then
   BLACKLIST=
 ...
 ```
+**NOTE:** The TSS reference file was generated from the Ensembl GTF using [this script](src/tss_from_gtf.py).
 
 Now run the script to build the custom genome database. Specify a destination directory and install the MoTrPAC rn6
 reference with the following command. We recommend not to run this installer on a login node of your cluster. It will
