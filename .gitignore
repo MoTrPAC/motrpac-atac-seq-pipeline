@@ -2,3 +2,6 @@ config/
 metadata/
 .DS_Store
 test_data/
+.idea/
+.fleet/
+stash/

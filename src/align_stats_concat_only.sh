@@ -26,31 +26,15 @@ fi
 
 #module load samtools
 
-cwd=$(pwd)
 cd "$indir"
 mkdir -p idxstats # make outdir
 
 align_stats() {
   local bam=$1 # 90141015805_R1.trim.bam - UNFILTERED BAM
   local viallabel
-  local primary
 
   viallabel=$(basename "$bam" | sed "s/_R1.*//")
-  echo "$viallabel"
-
-  if [ -f idxstats/"${viallabel}"_chrinfo.txt ] && samtools quickcheck "$bam" 2&> /dev/null ; then
-    echo "Skipping $viallabel"
-    return
-  fi
-
-  primary=idxstats/${viallabel}_primary.bam
-  # already sorted
-  # keep only primary alignments
-  samtools view -b -F 0x900 "$bam" -o "$primary"
-  # index
-  samtools index "$primary"
-  samtools idxstats "$primary" >"idxstats/${viallabel}_chrinfo.txt"
-  rm "$primary" "${primary}.bai"
+  echo "Processing $viallabel"
 
   # get counts
   local total
@@ -78,13 +62,6 @@ align_stats() {
   pct_auto=$(echo "scale=5; ${auto}/${total}*100" | bc -l | sed 's/^\./0./')
   pct_contig=$(echo "scale=5; ${contig}/${total}*100" | bc -l | sed 's/^\./0./')
 
-  echo $viallabel
-  echo $total
-  echo $pct_x
-  echo $pct_y
-  echo $pct_mt
-  echo $pct_auto
-  echo $pct_contig
   # output to file
   echo 'viallabel,total_primary_alignments,pct_chrX,pct_chrY,pct_chrM,pct_auto,pct_contig' >"idxstats/${viallabel}_chrinfo.csv"
   echo "${viallabel},${total},${pct_x},${pct_y},${pct_mt},${pct_auto},${pct_contig}" >>"idxstats/${viallabel}_chrinfo.csv"
@@ -92,12 +69,12 @@ align_stats() {
 export -f align_stats
 
 if [ "$type" == "glob" ]; then
-  parallel --joblog ~/mnt/tmp/"$(basename bamdir)"_"$(date "+%b%d%Y_%H%M%S")"_align_stats_joblog.log --progress --bar --verbose --jobs "$cores" align_stats ::: "$(ls "${bamdir%/}"/*/*/align/rep*/*_R1.trim.bam)"
+  parallel --joblog ~/mnt/tmp/"$(basename bamdir)"_align_stats_concat_joblog.log --progress --bar --verbose --jobs "$cores" align_stats ::: "$(ls "${bamdir%/}"/*/*/align/rep*/*_R1.trim.bam)"
 elif [ "$type" == "file" ]; then
   readarray -t raw_bam_list <<<"$bamdir"
-  parallel --joblog ~/mnt/tmp/"$(basename bamdir)"_"$(date "+%b%d%Y_%H%M%S")"_align_stats_joblog.log --progress --bar --verbose --jobs "$cores" align_stats ::: "${raw_bam_list[@]}"
+  parallel --joblog ~/mnt/tmp/"$(basename bamdir)"_align_stats_concat_joblog.log --progress --bar --verbose --jobs "$cores" align_stats ::: "${raw_bam_list[@]}"
 elif [ "$type" == "find" ]; then
-  parallel --joblog ~/mnt/tmp/"$(basename bamdir)"_"$(date "+%b%d%Y_%H%M%S")"_align_stats_joblog.log --progress --bar --verbose --jobs "$cores" align_stats ::: "$(find -name "*_R1.trim.bam" "$bamdir")"
+  parallel --joblog ~/mnt/tmp/"$(basename bamdir)"_align_stats_concat_joblog.log --progress --bar --verbose --jobs "$cores" align_stats ::: "$(find -name "*_R1.trim.bam" "$bamdir")"
 else
   echo "type must be glob, file, or find"
   exit 1
@@ -107,5 +84,3 @@ fi
 #head -1 $(find -name "*_chrinfo.csv" | head -1) > merged_chr_info.csv
 #for file in $(find -name "*_chrinfo.csv"); do sed -e '1d' $file >> merged_chr_info.csv; done
 cat idxstats/*_chrinfo.csv | grep -v "^viallabel" | sed '1iviallabel,total_primary_alignments,pct_chrX,pct_chrY,pct_chrM,pct_auto,pct_contig' >merged_chr_info.csv
-cd "$cwd" || exit 1
-
