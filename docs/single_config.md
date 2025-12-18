@@ -7,14 +7,14 @@ A configuration (config) file is a file in JSON format that specifies input para
 This tutorial walks you through the steps to quickly generate config files for a large number of samples with the same runtime parameters (e.g. memory requirements, reference genome).  
 
 You will need to define a few paths first: 
-1. `base_json`: A trucated JSON file with paramaters that are constant for all samples in this batch. Find an example [here](../examples/base.json). `/path/to/genome.tsv` refers to the path to either `"motrpac_rn6.tsv"` or `"motrpac_hg38.tsv"` file generated in **Step 3**. Note that you **must** include the following parameters for consistency within MoTrPAC:
+1. `base_json`: A truncated JSON file with parameters that are constant for all samples in this batch. Find an example [here](../examples/base.json). `/path/to/genome.tsv` refers to the path to either `"motrpac_rn6.tsv"` (for rat) or `"hg38.tsv"` (for human) file generated in [Section 3.5 of the README](../README.md#35-install-genome-databases). Note that you **must** include the following parameters for consistency within MoTrPAC:
 ```
     "atac.genome_tsv" : "/path/to/genome.tsv",
     "atac.paired_end" : true,
     "atac.multimapping" : 4,
     "atac.auto_detect_adapter" : true,
     "atac.enable_idr" : true,
-    "atac.paired_end" : true,
+    "atac.enable_tss_enrich" : true,
 ```
 2. `fastq_dir`: The path to the FASTQ files for all samples in this batch. Note that FASTQ files should be named by vial label, e.g. `90013015505_R1.fastq.gz`.  
 3. `config_dir`: The path to the desired output directory for the generated config files. 
