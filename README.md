@@ -38,33 +38,70 @@ For additional details not directly related to running the ENCODE ATAC-seq pipel
 
 ## Table of Contents
 
-1. [Prerequisites](#1-prerequisites)
-2. [Prepare ATAC-seq data for submission to the BIC](#2-prepare-atac-seq-data-for-submission-to-the-bic)
-   - 2.1 [Clone this repository](#21-clone-this-repository)
-   - 2.2 [Generate and format FASTQs](#22-generate-and-format-fastqs)
-   - 2.3 [Collect additional documents](#23-collect-additional-documents)
-   - 2.4 [Submit data](#24-submit-data)
-   - 2.5 [(GET Sites only) Download pipeline outputs FROM BIC](#25-get-sites-only-download-pipeline-outputs-from-bic)
-3. [Install and test ENCODE ATAC-seq pipeline and dependencies](#3-install-and-test-encode-atac-seq-pipeline-and-dependencies)
-   - 3.1 [Clone the ENCODE repository](#31-clone-the-encode-repository)
-   - 3.2 [(Optional) Install the Conda environment with all software dependencies](#32-optional-install-the-conda-environment-with-all-software-dependencies)
-   - 3.3 [Initialize Caper](#33-initialize-caper)
-   - 3.4 [Run a test sample](#34-run-a-test-sample)
-   - 3.5 [Install genome databases](#35-install-genome-databases)
-4. [Run the ENCODE ATAC-seq pipeline](#4-run-the-encode-atac-seq-pipeline)
-   - 4.1 [Generate configuration files](#41-generate-configuration-files)
-   - 4.2 [Run the pipeline](#42-run-the-pipeline)
-   - 4.3 [(Optional) Monitoring execution status](#43-optional-monitoring-execution-status)
-5. [Organize outputs](#5-organize-outputs)
-   - 5.1 [Mount the output directory](#51-mount-the-output-directory)
-   - 5.2 [Collect important outputs with croo](#52-collect-important-outputs-with-croo)
-   - 5.3 [Generate a spreadsheet of QC metrics for all samples with qc2tsv](#53-generate-a-spreadsheet-of-qc-metrics-for-all-samples-with-qc2tsv)
-6. [Flag problematic samples](#6-flag-problematic-samples)
-7. [Post-processing scripts](#7-post-processing-scripts)
-8. [Troubleshooting](#8-troubleshooting)
-9. [Citations and References](#9-citations-and-references)
-10. [Contributing and Support](#10-contributing-and-support)
-11. [Version Information](#11-version-information)
+- [MoTrPAC ATAC-Seq QC and Analysis Pipeline](#motrpac-atac-seq-qc-and-analysis-pipeline)
+  - [Overview](#overview)
+    - [ATAC-Seq Method](#atac-seq-method)
+    - [Pipeline Implementation](#pipeline-implementation)
+    - [Important References](#important-references)
+    - [Documentation Purpose](#documentation-purpose)
+  - [Table of Contents](#table-of-contents)
+  - [1. Prerequisites](#1-prerequisites)
+    - [Required Software](#required-software)
+    - [Required Accounts (for cloud execution)](#required-accounts-for-cloud-execution)
+    - [Supported Organisms](#supported-organisms)
+    - [Study-Specific Information](#study-specific-information)
+  - [2. Prepare ATAC-seq data for submission to the BIC](#2-prepare-atac-seq-data-for-submission-to-the-bic)
+    - [2.1 Clone this repository](#21-clone-this-repository)
+    - [2.2 Generate and format FASTQs](#22-generate-and-format-fastqs)
+    - [2.3 Collect additional documents](#23-collect-additional-documents)
+    - [2.4 Submit data](#24-submit-data)
+    - [2.5 (GET Sites only) Download pipeline outputs FROM BIC](#25-get-sites-only-download-pipeline-outputs-from-bic)
+  - [3. Install and test ENCODE ATAC-seq pipeline and dependencies](#3-install-and-test-encode-atac-seq-pipeline-and-dependencies)
+    - [Quick start (GCP only)](#quick-start-gcp-only)
+    - [3.1 Clone the ENCODE repository](#31-clone-the-encode-repository)
+      - [IMPORTANT: Required modification to atac.wdl](#important-required-modification-to-atacwdl)
+    - [3.2 (Optional) Install the `Conda` environment with all software dependencies](#32-optional-install-the-conda-environment-with-all-software-dependencies)
+    - [3.3 Initialize `Caper`](#33-initialize-caper)
+    - [3.4 Run a test sample](#34-run-a-test-sample)
+      - [On Stanford SCG/SLURM](#on-stanford-scgslurm)
+    - [3.5 Install genome databases](#35-install-genome-databases)
+      - [3.5.1 Install the hg38 genome database](#351-install-the-hg38-genome-database)
+      - [3.5.2 Install the custom rn6 genome database](#352-install-the-custom-rn6-genome-database)
+  - [4. Run the ENCODE ATAC-seq pipeline](#4-run-the-encode-atac-seq-pipeline)
+    - [4.1 Generate configuration files](#41-generate-configuration-files)
+    - [4.2 Run the pipeline](#42-run-the-pipeline)
+      - [For GCP](#for-gcp)
+      - [For Stanford SCG/SLURM](#for-stanford-scgslurm)
+    - [4.3 (Optional) Monitoring execution status](#43-optional-monitoring-execution-status)
+  - [5. Organize outputs](#5-organize-outputs)
+    - [5.1 Mount the output directory](#51-mount-the-output-directory)
+    - [5.2 Collect important outputs with `croo`](#52-collect-important-outputs-with-croo)
+    - [5.3 Generate a spreadsheet of QC metrics for all samples with `qc2tsv`](#53-generate-a-spreadsheet-of-qc-metrics-for-all-samples-with-qc2tsv)
+  - [6. Flag problematic samples](#6-flag-problematic-samples)
+  - [7. Post-processing scripts](#7-post-processing-scripts)
+    - [7.1. Individual scripts](#71-individual-scripts)
+  - [8. Troubleshooting](#8-troubleshooting)
+    - [Common Issues](#common-issues)
+    - [Getting Help](#getting-help)
+  - [9. Citations and References](#9-citations-and-references)
+    - [Pipeline and Tools](#pipeline-and-tools)
+    - [ATAC-seq Methodology](#atac-seq-methodology)
+    - [Data Standards](#data-standards)
+    - [MoTrPAC Documentation](#motrpac-documentation)
+    - [Software Tools](#software-tools)
+  - [10. Contributing and Support](#10-contributing-and-support)
+    - [Reporting Issues](#reporting-issues)
+    - [Contact](#contact)
+    - [Contributing](#contributing)
+    - [Related Repositories](#related-repositories)
+  - [11. Version Information](#11-version-information)
+    - [Current Version](#current-version)
+    - [Citing This Pipeline](#citing-this-pipeline)
+    - [Software Versions](#software-versions)
+    - [Compatibility Notes](#compatibility-notes)
+    - [Genome Databases](#genome-databases)
+    - [Change History](#change-history)
+    - [Known Limitations](#known-limitations)
 
 ## 1. Prerequisites
 
@@ -179,10 +216,10 @@ Refer to the [GET CAS-to-BIC Data Transfer Guidelines](https://docs.google.com/d
 
 After the BIC has finished running the ENCODE ATAC-seq pipeline on a batch of submitted data, use [`extract_atac_from_gcp_pass.sh`](src/extract_atac_from_gcp_pass.sh) to download the important subset of outputs from GCP.
 
-The script takes three arguments: the number of cores, the CROO output path, and the download directory. Run the script as follows:
+The script takes three arguments: the number of cores, the download directory, and the CROO output path. Run the script as follows:
 
 ```bash
-bash src/extract_atac_from_gcp_pass.sh ${NUM_CORES} ${CROO_OUTPUT_PATH} ${DOWNLOAD_DIR}
+bash src/extract_atac_from_gcp_pass.sh ${NUM_CORES} ${DOWNLOAD_DIR} ${CROO_OUTPUT_PATH}
 ```
 
 ## 3. Install and test ENCODE ATAC-seq pipeline and dependencies
@@ -349,7 +386,7 @@ java-heap-run=4G
 
 ### 3.4 Run a test sample
 
-Follow [these platform-specific instructions](https://github.com/ENCODE-DCC/caper/blob/master/README.md#activating-conda-environment) to run a test sample. Use the following variable assignments:
+Follow [these platform-specific instructions](https://github.com/MoTrPAC/caper/blob/master/README.md#activating-conda-environment) to run a test sample. Use the following variable assignments:
 
 ```bash
 # the next variable is only needed if using conda to manage Python packages
@@ -461,7 +498,7 @@ Please click the appropriate link below for detailed instructions on how to auto
 
 ### 4.2 Run the pipeline
 
-Actually running the pipeline is straightforward. However, the command is different depending on the environment in which you set up the pipeline. Refer back to environment-specific instructions [here](https://github.com/ENCODE-DCC/caper/blob/master/README.md#activating-conda-environment).
+Actually running the pipeline is straightforward. However, the command is different depending on the environment in which you set up the pipeline. Refer back to environment-specific instructions [here](https://github.com/MoTrPAC/caper/blob/master/README.md#activating-conda-environment).
 
 An `atac` directory containing all of the pipeline outputs is created in the output directory (note the default output directory is the current working directory). One arbitrarily-named subdirectory for each config file (assuming the command is run in a loop for several samples) is written in `atac`.
 
@@ -662,7 +699,7 @@ Use the post-processing wrapper scripts to generate the QC report and to generat
 
 If issues persist:
 1. Check the [ENCODE ATAC-seq pipeline documentation](https://github.com/ENCODE-DCC/atac-seq-pipeline)
-2. Review the [Caper documentation](https://github.com/ENCODE-DCC/caper)
+2. Review the [Caper documentation](https://github.com/MoTrPAC/caper)
 3. Consult the [MoTrPAC ATAC-seq MOP](https://docs.google.com/document/d/1vnB7ITAKnaZYc3v_FCdaDu3z-JXeDncRk5GnqzQVwRw/edit#heading=h.tjbixx8yyd33)
 4. Open an issue on this GitHub repository with:
    - Description of the problem
@@ -675,7 +712,7 @@ If issues persist:
 ### Pipeline and Tools
 
 - **ENCODE ATAC-seq pipeline**: [https://github.com/ENCODE-DCC/atac-seq-pipeline](https://github.com/ENCODE-DCC/atac-seq-pipeline)
-- **Caper**: [https://github.com/ENCODE-DCC/caper](https://github.com/ENCODE-DCC/caper) - Cromwell wrapper for workflow execution
+- **Caper**: [https://github.com/MoTrPAC/caper](https://github.com/MoTrPAC/caper) - Cromwell wrapper for workflow execution
 - **Cromwell**: [https://cromwell.readthedocs.io/](https://cromwell.readthedocs.io/) - Workflow management system
 - **Croo**: ENCODE tool for organizing pipeline outputs
 - **qc2tsv**: Tool for converting JSON QC to TSV format
