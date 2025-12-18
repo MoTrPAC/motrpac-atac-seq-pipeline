@@ -11,10 +11,11 @@ This tutorial walks you through the steps to quickly generate config files for a
 * R `data.table` package  
 * R `optparse` package 
 * R `bit64` package
+* `src/meta_pass_data_dict.txt`: A data dictionary file with metadata column mappings (contact the MoTrPAC Bioinformatics Center if you need this file)
 
 You will need a few things for this tutorial:  
 1. `gitdir`: The absolute path to this repository, e.g. `~/ATAC_PIPELINE/motrpac-atac-seq-pipeline` 
-2. `base_json`: A trucated JSON file with paramaters that are constant for all samples in this batch. Find an example [here](../examples/base.json). `/path/to/genome.tsv` refers to the path to either `"motrpac_rn6.tsv"` or `"hg38.tsv"` file generated in **Step 3**. Note that you must include the following parameters for consistency within MoTrPAC:
+2. `base_json`: A truncated JSON file with parameters that are constant for all samples in this batch. Find an example [here](../examples/base.json). `/path/to/genome.tsv` refers to the path to either `"motrpac_rn6.tsv"` (for rat) or `"hg38.tsv"` (for human) file generated in [Section 3.5 of the README](../README.md#35-install-genome-databases). Note that you must include the following parameters for consistency within MoTrPAC:
 ```
     "atac.genome_tsv" : "/path/to/genome.tsv",
     "atac.multimapping" : 4,

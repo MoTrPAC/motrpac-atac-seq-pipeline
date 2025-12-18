@@ -177,12 +177,12 @@ Refer to the [GET CAS-to-BIC Data Transfer Guidelines](https://docs.google.com/d
 
 ### 2.5 (GET Sites only) Download pipeline outputs FROM BIC
 
-After the BIC has finished running the ENCODE ATAC-seq pipeline on a batch of submitted data, use [`pass_extract_atac_from_gcp.sh`](src/pass_extract_atac_from_gcp.sh) to download the important subset of outputs from GCP.
+After the BIC has finished running the ENCODE ATAC-seq pipeline on a batch of submitted data, use [`extract_atac_from_gcp_pass.sh`](src/extract_atac_from_gcp_pass.sh) to download the important subset of outputs from GCP.
 
-Inside the script, change the `download_dir` and `gsurl` paths to point to the gsutil source and the local destination, respectively. Then run the script with the number of cores available for parallelization as an argument, e.g.:
+The script takes three arguments: the number of cores, the CROO output path, and the download directory. Run the script as follows:
 
 ```bash
-bash pass_extract_atac_from_gcp.sh 10
+bash src/extract_atac_from_gcp_pass.sh ${NUM_CORES} ${CROO_OUTPUT_PATH} ${DOWNLOAD_DIR}
 ```
 
 ## 3. Install and test ENCODE ATAC-seq pipeline and dependencies
@@ -248,6 +248,13 @@ Replace the `runtime` parameters in the `raise_exception` task with these:
         time: 1
         disks: 'local-disk 10 SSD'
     }
+```
+
+**Alternatively, you can apply the patch file provided in this repository:**
+
+```bash
+cd ~/ATAC_PIPELINE/atac-seq-pipeline
+git apply ~/ATAC_PIPELINE/motrpac-atac-seq-pipeline/patches/fix__add_missing_runtime_attributes_to_atac-seq_v1_7_0.patch
 ```
 
 **If you do not make this change, you will get the following error when you try to run the pipeline:**
@@ -603,20 +610,21 @@ The following metrics are not strictly exclusion criteria for MoTrPAC samples, b
 Use the post-processing wrapper scripts to generate the QC report and to generate the final count matrix.
 
 **Wrapper scripts:**
-- [atac-post-process-wrapper.sh](src/atac-post-process-pass-wrapper.sh): wrapper script to generate QC report and final count matrix for PASS samples
-- [atac-seq-human-wrapper.sh](src/atac-post-process-human-wrapper.sh): wrapper script to generate QC report and final count matrix for human samples
+- [atac-post-process-pass-wrapper.sh](src/atac-post-process-pass-wrapper.sh): wrapper script to generate QC report and final count matrix for PASS (rat) samples
+- [atac-post-process-human-wrapper.sh](src/atac-post-process-human-wrapper.sh): wrapper script to generate QC report and final count matrix for CASS (human) samples
 
 > **IMPORTANT:** For each of these wrappers, make sure you fill in the appropriate variables at the top of the script before running.
 
 ### 7.1. Individual scripts
 
 - [extract_rep_names_from_encode.sh](src/extract_rep_names_from_encode.sh): generate rep-to-viallabel map to interpret QC report
-- [pass_extract_atac_from_gcp.sh](src/pass_extract_atac_from_gcp.sh): download relevant files for PASS samples from ENCODE output
-- [human_extract_atac_from_gcp.sh](src/extract_atac_from_gcp_human.sh): download relevant files for human samples from ENCODE output
+- [extract_atac_from_gcp_pass.sh](src/extract_atac_from_gcp_pass.sh): download relevant files for PASS (rat) samples from ENCODE output
+- [extract_atac_from_gcp_human.sh](src/extract_atac_from_gcp_human.sh): download relevant files for CASS (human) samples from ENCODE output
 - [encode_to_count_matrix.sh](src/encode_to_count_matrix.sh): use `narrowPeak.gz` and `tagAlign` files to generate a peak x sample raw counts matrix for PASS samples
 - [encode_to_count_matrix_human.sh](src/encode_to_count_matrix_human.sh): use `narrowPeak.gz` and `tagAlign` files to generate a peak x sample raw counts matrix for human samples
 - [align_stats.sh](src/align_stats.sh): calculate % of primary alignments aligning to chrX, chrY, chrM, autosomes, and contigs
-- [merge_atac_qc.R](src/merge_atac_qc.R): merge wet lab QC, curated pipeline QC, and alignment stats
+- [merge_atac_qc.R](src/merge_atac_qc.R): merge wet lab QC, curated pipeline QC, and alignment stats for PASS samples
+- [merge_atac_qc_human.R](src/merge_atac_qc_human.R): merge wet lab QC, curated pipeline QC, and alignment stats for human samples
 
 ## 8. Troubleshooting
 
