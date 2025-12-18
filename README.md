@@ -38,27 +38,27 @@ For additional details not directly related to running the ENCODE ATAC-seq pipel
 
 ## Table of Contents
 
-1. [Prerequisites](#prerequisites)
+1. [Prerequisites](#1-prerequisites)
 2. [Prepare ATAC-seq data for submission to the BIC](#2-prepare-atac-seq-data-for-submission-to-the-bic)
-   - 2.1 Clone this repository
-   - 2.2 Generate and format FASTQs
-   - 2.3 Collect additional documents
-   - 2.4 Submit data
-   - 2.5 [**GET Sites only: Download pipeline outputs FROM BIC**](#25--get-sites-only--download-pipeline-outputs-from-bic)
+   - 2.1 [Clone this repository](#21-clone-this-repository)
+   - 2.2 [Generate and format FASTQs](#22-generate-and-format-fastqs)
+   - 2.3 [Collect additional documents](#23-collect-additional-documents)
+   - 2.4 [Submit data](#24-submit-data)
+   - 2.5 [(GET Sites only) Download pipeline outputs FROM BIC](#25-get-sites-only-download-pipeline-outputs-from-bic)
 3. [Install and test ENCODE ATAC-seq pipeline and dependencies](#3-install-and-test-encode-atac-seq-pipeline-and-dependencies)
-   - 3.1 Clone the ENCODE repository
-   - 3.2 Install the `Conda` environment with all software dependencies
-   - 3.3 Initialize `Caper`
-   - 3.4 Run a test sample
+   - 3.1 [Clone the ENCODE repository](#31-clone-the-encode-repository)
+   - 3.2 [(Optional) Install the Conda environment with all software dependencies](#32-optional-install-the-conda-environment-with-all-software-dependencies)
+   - 3.3 [Initialize Caper](#33-initialize-caper)
+   - 3.4 [Run a test sample](#34-run-a-test-sample)
    - 3.5 [Install genome databases](#35-install-genome-databases)
 4. [Run the ENCODE ATAC-seq pipeline](#4-run-the-encode-atac-seq-pipeline)
-   - 4.1 Generate configuration files
-   - 4.2 Run the pipeline
-   - 4.3 (Optional) Monitoring execution status
+   - 4.1 [Generate configuration files](#41-generate-configuration-files)
+   - 4.2 [Run the pipeline](#42-run-the-pipeline)
+   - 4.3 [(Optional) Monitoring execution status](#43-optional-monitoring-execution-status)
 5. [Organize outputs](#5-organize-outputs)
-   - 5.1 Mount the output directory
-   - 5.2 Collect important outputs with `croo`
-   - 5.3 Generate a spreadsheet of QC metrics with `qc2tsv`
+   - 5.1 [Mount the output directory](#51-mount-the-output-directory)
+   - 5.2 [Collect important outputs with croo](#52-collect-important-outputs-with-croo)
+   - 5.3 [Generate a spreadsheet of QC metrics for all samples with qc2tsv](#53-generate-a-spreadsheet-of-qc-metrics-for-all-samples-with-qc2tsv)
 6. [Flag problematic samples](#6-flag-problematic-samples)
 7. [Post-processing scripts](#7-post-processing-scripts)
 8. [Troubleshooting](#8-troubleshooting)
