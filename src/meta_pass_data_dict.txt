@@ -1,0 +1,44 @@
+column	key	val
+sex	1	Female
+sex	2	Male
+Protocol	1	Phase 1A
+Protocol	2	Phase 1B
+Protocol	4	Phase 1C
+intervention	1	Exercise (Phase 1A)
+intervention	2	Training (Phase 1B)
+intervention	3	Control
+sacrificeTime	1	Immediate Post Exercise (Phase 1A and 1C)
+sacrificeTime	2	0.5 hour (Phase 1A and 1C)
+sacrificeTime	3	1 hour (Phase 1A and 1C)
+sacrificeTime	4	4 hour (Phase 1A and 1C)
+sacrificeTime	5	7 hour (Phase 1A)
+sacrificeTime	6	24 hour (Phase 1A)
+sacrificeTime	7	48 hour (Phase 1A)
+sacrificeTime	8	1 week of training or control time (Phase 1B)
+sacrificeTime	9	2 weeks of training (Phase 1B)
+sacrificeTime	10	4 weeks of training (Phase 1B)
+sacrificeTime	11	8 weeks of training or control time (Phase 1B)
+sacrificeTime	12	0 hour (Phase 1C)
+siteName	910	Joslin
+siteName	930	University of Florida
+siteName	940	University of Iowa
+sampleTypeCode	30	Blood RNA later
+sampleTypeCode	52	Heart
+sampleTypeCode	53	Kidney
+sampleTypeCode	54	Liver
+sampleTypeCode	55	Lung
+sampleTypeCode	56	White Adipose
+sampleTypeCode	57	Hippocampus
+sampleTypeCode	58	Gastrocnemius
+sampleTypeCode	59	Vastus Lateralis
+sampleTypeCode	60	Aorta
+sampleTypeCode	61	Colon
+sampleTypeCode	62	Ovaries
+sampleTypeCode	63	Small Intestine
+sampleTypeCode	64	Spleen
+sampleTypeCode	65	Testes
+sampleTypeCode	66	Brown Adipose
+sampleTypeCode	67	Adrenal
+sampleTypeCode	68	Hypothalamus
+sampleTypeCode	69	Vena Cava
+sampleTypeCode	70	Cortex
