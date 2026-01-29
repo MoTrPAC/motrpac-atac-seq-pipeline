@@ -16,7 +16,15 @@ option_list <- list(
 opt <- parse_args(OptionParser(option_list=option_list))
 
 ########################################################################################
-## Get list of FASTQ files 
+## Create output directory if it doesn't exist
+########################################################################################
+
+if (!dir.exists(opt$outdir)) {
+  dir.create(opt$outdir, recursive = TRUE)
+}
+
+########################################################################################
+## Get list of FASTQ files
 ########################################################################################
 
 if(opt$gcp){
@@ -55,31 +63,31 @@ meta <- meta[vialLabel %in% sample_names]
 
 uniq_comb <- unique(meta, by=c('sacrificeTime','sex','sampleTypeCode','Protocol','intervention'))
 write_fastq_to_json <- function(replicate_num, replicate_name, read, out=outfile, flist=fastq_list, last=FALSE){
-  
+
   fastq_files <- flist[grepl(replicate_name, flist)]
-  
+
   read_file <- fastq_files[grep(paste0("_R",read),basename(fastq_files))]
-  
-  system(sprintf('echo "    \\"atac.fastqs_rep%s_R%s\\" : [" >> %s',replicate_num,read,out))
-  
+
+  system(sprintf('echo "    \\"atac.fastqs_rep%s_R%s\\" : [" >> "%s"',replicate_num,read,out))
+
   if(length(read_file) == 1){
-    system(sprintf('echo "        \\"%s\\"" >> %s',read_file,out))
+    system(sprintf('echo "        \\"%s\\"" >> "%s"',read_file,out))
   } else { # more than one lane
     for (i in 1:length(read_file)){
       if (i == length(read_file)){
-        system(sprintf('echo "        \\"%s\\"" >> %s',read_file,out)) # if it's the last file, don't add a comma
+        system(sprintf('echo "        \\"%s\\"" >> "%s"',read_file[i],out)) # if it's the last file, don't add a comma
       } else {
-        system(sprintf('echo "        \\"%s\\"," >> %s',read_file,out))
+        system(sprintf('echo "        \\"%s\\"," >> "%s"',read_file[i],out))
       }
     }
   }
-  
+
   if(last){ # don't add a comma if it's the last replicate
-    system(sprintf('echo "    ]" >> %s', out))
+    system(sprintf('echo "    ]" >> "%s"', out))
   } else {
-    system(sprintf('echo "    ]," >> %s', out))
+    system(sprintf('echo "    ]," >> "%s"', out))
   }
-  system(sprintf('echo >> %s', out))
+  system(sprintf('echo >> "%s"', out))
 }
 
 for (id in as.character(uniq_comb[,barcode])){
@@ -89,15 +97,17 @@ for (id in as.character(uniq_comb[,barcode])){
   
   # make a character string to describe replicates
   description <- gsub(' ','-',paste(unname(unlist(sub[1])), collapse='_'))
-  
+  # Remove parentheses and other problematic characters from filename
+  description <- gsub('[()]', '', description)
+
   # generate JSON file for each set of replicates
   outfile <- paste0(opt$outdir, '/', description, '.json')
-  system(sprintf('echo "{" > %s',outfile))
-  system(sprintf('cat %s >> %s', opt$json, outfile))
-  
+  system(sprintf('echo "{" > "%s"',outfile))
+  system(sprintf('cat "%s" >> "%s"', opt$json, outfile))
+
   # add description to JSON
-  system(sprintf('echo "    \\"atac.description\\" : \\"%s\\"," >> %s', description, outfile))
-  system(sprintf('echo >> %s',outfile))
+  system(sprintf('echo "    \\"atac.description\\" : \\"%s\\"," >> "%s"', description, outfile))
+  system(sprintf('echo >> "%s"',outfile))
   
   # fastq files for each replicate
   for (i in 1:length(replicates)){
@@ -109,8 +119,8 @@ for (id in as.character(uniq_comb[,barcode])){
     }
   }
   
-  system(sprintf('echo "}" >> %s',outfile))
-  
+  system(sprintf('echo "}" >> "%s"',outfile))
+
 }
 
 # read in reference standard file 
@@ -123,18 +133,20 @@ for (sample_name in ref_standard){
   # make a character string to describe replicates
   description <- gsub(' ','-',paste(unname(unlist(ref_meta[as.character(MTP_RefLabel)==sample_name, .(MTP_RefType, MTP_RefDescription)])), collapse='_'))
   description <- gsub(',', '', description)
-  
+  # Remove parentheses and other problematic characters from filename
+  description <- gsub('[()]', '', description)
+
   # generate JSON file for each set of replicates
   outfile <- paste0(opt$outdir, '/', description, '.json')
-  system(sprintf('cat %s > %s', opt$json, outfile))
-  
+  system(sprintf('cat "%s" > "%s"', opt$json, outfile))
+
   # add description to JSON
-  system(sprintf('echo "    \\"atac.title\\" : \\"%s\\"," >> %s', description, outfile))
-  system(sprintf('echo >> %s',outfile))
+  system(sprintf('echo "    \\"atac.title\\" : \\"%s\\"," >> "%s"', description, outfile))
+  system(sprintf('echo >> "%s"',outfile))
   
   # fastq files for each replicate
   write_fastq_to_json(1, sample_name, read=1)
   write_fastq_to_json(1, sample_name, read=2, last=TRUE)
-  
-  system(sprintf('echo "}" >> %s',outfile))
+
+  system(sprintf('echo "}" >> "%s"',outfile))
 }
