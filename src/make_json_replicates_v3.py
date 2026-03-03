@@ -419,25 +419,21 @@ def write_json_config(outfile, base_json_path, description, replicates, fastq_li
     fastq_list_all : list
         List of all FASTQ files
     age_group : str, optional
-        Human-readable age group from BIC data
+        Unused. Retained for call-site compatibility.
     protocol : str, optional
-        Protocol/phase name from BIC data
+        Unused. Retained for call-site compatibility.
     """
     with open(base_json_path, 'r') as f:
         base_json = f.read()
 
+    title = os.path.splitext(os.path.basename(outfile))[0]
+
     lines = []
     lines.append('{')
-    lines.append(base_json)
-    lines.append(f'    "atac.description" : "{description}",')
-
-    # Add BIC metadata fields if available
-    if age_group:
-        lines.append(f'    "atac.age_group" : "{age_group}",')
-    if protocol:
-        lines.append(f'    "atac.protocol" : "{protocol}",')
-
+    lines.append(f'    "atac.title" : "{title}",')
+    lines.append(f'    "atac.description" : "{title}",')
     lines.append('')
+    lines.append(base_json)
 
     for i, replicate in enumerate(replicates, start=1):
         is_last = (i == len(replicates))

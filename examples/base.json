@@ -1,5 +1,4 @@
-    "atac.title" : "MoTrPAC PASS1A ATAC - gastroc",
-    "atac.genome_tsv" : "gs://rna-seq_araja/references/rn/v96/atacv1.5.3/motrpac_rn6_gcp.tsv",
+    "atac.genome_tsv" : "gs://omicspipelines-public-resources/atac-seq/rat/rn8/motrpac_rn8.tsv",
 
     "atac.pipeline_type" : "atac",
 
