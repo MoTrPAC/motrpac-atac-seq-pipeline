@@ -22,7 +22,7 @@ if ! [ -f "$WDL_FILE" ]; then
   echo "$WDL_FILE does not exist"
 fi
 
-if ! python -c 'import caper' &>/dev/null; then
+if ! command -v caper &>/dev/null; then
   echo "caper not installed" >&2
   exit 1
 fi
@@ -37,7 +37,7 @@ function submit_file() {
   local workflow_id
   local json_str
 
-  submission_output=$(python3 -m caper submit -i "$input_json_file" "$WDL_FILE" 2>&1)
+  submission_output=$(caper submit -i "$input_json_file" "$WDL_FILE" 2>&1)
   parsed_output=$(echo "$submission_output" | tail -n1 | sed -E 's/(.*)(\{[^}]*\})/\2/g' | sed -E 's/'\''/\"/g')
   echo "$parsed_output"
   workflow_id=$(echo "$parsed_output" | jq -r '.id')

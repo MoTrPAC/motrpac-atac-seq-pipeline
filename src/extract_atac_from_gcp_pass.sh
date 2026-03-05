@@ -48,10 +48,10 @@ DOWNLOAD_DIR=${DOWNLOAD_DIR%/}
 if [[ "$copy_dest" == "gcp" ]]; then
 
   # individual tagAlign files
-  gsutil -m cp -n "${CROO_OUTPUT_PATH}/*/*/align/rep?/*tagAlign.gz" "${DOWNLOAD_DIR}/tagalign/"
+  gsutil -m cp -n "${CROO_OUTPUT_PATH}/*/align/rep?/*tagAlign.gz" "${DOWNLOAD_DIR}/tagalign/"
 
   # individual signal track (p-value)
-  gsutil -m cp -n "${CROO_OUTPUT_PATH}/*/*/signal/rep?/*pval.signal.bigwig" "${DOWNLOAD_DIR}/signal/"
+  gsutil -m cp -n "${CROO_OUTPUT_PATH}/*/signal/rep?/*pval.signal.bigwig" "${DOWNLOAD_DIR}/signal/"
 else
   cd "$DOWNLOAD_DIR" || (echo "ERROR: could not cd to $DOWNLOAD_DIR" && exit 1)
   mkdir -p qc peak signal tagalign
@@ -62,54 +62,50 @@ else
   gsutil cp -n "${CROO_OUTPUT_PATH}/*qc*" qc
 
   # individual tagAlign files
-  gsutil -m cp -n "${CROO_OUTPUT_PATH}/*/*/align/rep?/*tagAlign.gz" tagalign
+  gsutil -m cp -n "${CROO_OUTPUT_PATH}/*/align/rep?/*tagAlign.gz" tagalign
 
   # individual signal track (p-value)
-  gsutil -m cp -n "${CROO_OUTPUT_PATH}/*/*/signal/rep?/*pval.signal.bigwig" signal
+  gsutil -m cp -n "${CROO_OUTPUT_PATH}/*/signal/rep?/*pval.signal.bigwig" signal
 fi
 
 gs_copy() {
   local dir=$1
-  local subdir
   local condition
 
-  subdir=$(gsutil ls "$dir")
-  condition=$(basename "${subdir%/}")
+  condition=$(basename "${dir%/}")
 
   # merged peak file
-  gsutil cp -n "${subdir}peak/overlap_reproducibility/overlap.optimal_peak.narrowPeak.gz" "peak/${condition}.overlap.optimal_peak.narrowPeak.gz"
-  gsutil cp -n "${subdir}peak/overlap_reproducibility/overlap.optimal_peak.narrowPeak.hammock.gz" "peak/${condition}.overlap.optimal_peak.narrowPeak.hammock.gz"
+  gsutil cp -n "${dir}peak/overlap_reproducibility/overlap.optimal_peak.narrowPeak.gz" "peak/${condition}.overlap.optimal_peak.narrowPeak.gz"
+  gsutil cp -n "${dir}peak/overlap_reproducibility/overlap.optimal_peak.narrowPeak.hammock.gz" "peak/${condition}.overlap.optimal_peak.narrowPeak.hammock.gz"
 
   # pooled signal track
   if [[ $condition != *"GET-STDRef-Set"* ]]; then
-    gsutil cp -n "${subdir}signal/pooled-rep/basename_prefix.pooled.pval.signal.bigwig" "signal/${condition}.pooled.pval.signal.bigwig"
+    gsutil cp -n "${dir}signal/pooled-rep/basename_prefix.pooled.pval.signal.bigwig" "signal/${condition}.pooled.pval.signal.bigwig"
   fi
 
   # qc.html
-  gsutil cp -n "${subdir}qc/qc.html" "qc/${condition}.qc.html"
+  gsutil cp -n "${dir}qc/qc.html" "qc/${condition}.qc.html"
 }
 
 gs_copy_gcp() {
   local dir=$1
-  local subdir
   local condition
   local out_dir
 
-  subdir=$(gsutil ls "$dir" | grep -v 'rep_to_sample_map.csv\|tagalign')
-  condition=$(basename "${subdir%/}")
-  out_dir="$(dirname "$dir")/final"
+  condition=$(basename "${dir%/}")
+  out_dir="$(dirname "${dir%/}")/final"
 
   # merged peak file
-  gsutil -m cp -n "${subdir}peak/overlap_reproducibility/overlap.optimal_peak.narrowPeak.gz" "${out_dir}/peak/${condition}.overlap.optimal_peak.narrowPeak.gz"
-  gsutil -m cp -n "${subdir}peak/overlap_reproducibility/overlap.optimal_peak.narrowPeak.hammock.gz" "${out_dir}/peak/${condition}.overlap.optimal_peak.narrowPeak.hammock.gz"
+  gsutil -m cp -n "${dir}peak/overlap_reproducibility/overlap.optimal_peak.narrowPeak.gz" "${out_dir}/peak/${condition}.overlap.optimal_peak.narrowPeak.gz"
+  gsutil -m cp -n "${dir}peak/overlap_reproducibility/overlap.optimal_peak.narrowPeak.hammock.gz" "${out_dir}/peak/${condition}.overlap.optimal_peak.narrowPeak.hammock.gz"
 
   # pooled signal track
   if [[ $condition != *"GET-STDRef-Set"* ]]; then
-    gsutil -m cp -n "${subdir}signal/pooled-rep/basename_prefix.pooled.pval.signal.bigwig" "${out_dir}/signal/${condition}.pooled.pval.signal.bigwig"
+    gsutil -m cp -n "${dir}signal/pooled-rep/basename_prefix.pooled.pval.signal.bigwig" "${out_dir}/signal/${condition}.pooled.pval.signal.bigwig"
   fi
 
   # qc.html
-  gsutil cp -n "${subdir}qc/qc.html" "${out_dir}/qc/${condition}.qc.html"
+  gsutil cp -n "${dir}qc/qc.html" "${out_dir}/qc/${condition}.qc.html"
 }
 
 if [[ "$copy_dest" == "gcp" ]]; then
