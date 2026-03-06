@@ -95,10 +95,14 @@ stopifnot(nrow(dt) == nrow(viallabel_qc))
 ## merge all sample-level QC
 ###################################################################################
 
+# detect vial label column name in metadata (vial_label, viallabel, or vialLabel)
+vl_col <- intersect(colnames(wet), c('vial_label', 'viallabel', 'vialLabel'))
+if (length(vl_col) == 0) stop("Could not find vial label column in sample metadata. Expected one of: vial_label, viallabel, vialLabel")
+vl_col <- vl_col[1]
+message("Using metadata vial label column: ", vl_col)
+
 # merge with wet lab QC
-print(dt$viallabel)
-print(wet$vial_label)
-m1 <- merge(dt, wet, by.x = 'viallabel', by.y = 'vial_label')
+m1 <- merge(dt, wet, by.x = 'viallabel', by.y = vl_col)
 stopifnot(nrow(m1) == nrow(dt))
 # merge with align stats
 m2 <- merge(m1, align_stat, by = 'viallabel')
