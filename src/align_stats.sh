@@ -58,37 +58,30 @@ done)
 n_bams=$(echo "$bam_gcs_paths" | grep -c "." || true)
 echo "Found ${n_bams} genome BAMs"
 
-# 3. Copy BAMs to local tmp dir
-echo "Copying BAMs to ${TMP_BAM_DIR} ..."
-echo "$bam_gcs_paths" | while read -r bam; do
-  dest="${TMP_BAM_DIR}/$(basename "$bam")"
-  if [ -f "$dest" ]; then
-    echo "  Already exists, skipping: $(basename "$bam")"
-  else
-    echo "  Copying $(basename "$bam")..."
-    gsutil cp "$bam" "$dest"
-  fi
-done
-
-# 4. Run align_stats in parallel on local BAMs
+# 3. Run align_stats in parallel — each job copies its own BAM, processes it, then deletes it
+#    This keeps disk usage bounded to (cores × BAM size) rather than (all BAMs × BAM size)
 align_stats() {
-  local bam=$1
+  local bam_gcs=$1
   local viallabel
+  local local_bam
   local primary
 
-  viallabel=$(basename "$bam" | sed "s/_R1.*//")
-  echo "$viallabel"
+  viallabel=$(basename "$bam_gcs" | sed "s/_R1.*//")
 
-  if [ -f "idxstats/${viallabel}_chrinfo.txt" ] && samtools quickcheck "$bam" 2>/dev/null; then
-    echo "Skipping $viallabel"
+  if [ -f "idxstats/${viallabel}_chrinfo.txt" ]; then
+    echo "Skipping $viallabel (already done)"
     return
   fi
 
+  local_bam="${TMP_BAM_DIR}/${viallabel}_R1.trim.bam"
+  echo "Copying ${viallabel}..."
+  gsutil cp "$bam_gcs" "$local_bam"
+
   primary="idxstats/${viallabel}_primary.bam"
-  samtools view -b -F 0x900 "$bam" -o "$primary"
+  samtools view -b -F 0x900 "$local_bam" -o "$primary"
   samtools index "$primary"
   samtools idxstats "$primary" > "idxstats/${viallabel}_chrinfo.txt"
-  rm -f "$primary" "${primary}.bai"
+  rm -f "$primary" "${primary}.bai" "$local_bam"
 
   local total y x mt auto contig
   local pct_y pct_x pct_mt pct_auto pct_contig
@@ -108,17 +101,20 @@ align_stats() {
 
   echo 'viallabel,total_primary_alignments,pct_chrX,pct_chrY,pct_chrM,pct_auto,pct_contig' > "idxstats/${viallabel}_chrinfo.csv"
   echo "${viallabel},${total},${pct_x},${pct_y},${pct_mt},${pct_auto},${pct_contig}" >> "idxstats/${viallabel}_chrinfo.csv"
+  echo "Done: $viallabel"
 }
 export -f align_stats
+export TMP_BAM_DIR
 
-readarray -t local_bams < <(ls "${TMP_BAM_DIR}"/*_R1.trim.bam)
-echo "Running align_stats on ${#local_bams[@]} BAMs with ${cores} cores..."
+readarray -t bam_gcs_array <<< "$bam_gcs_paths"
+echo "Running align_stats on ${#bam_gcs_array[@]} BAMs with ${cores} cores..."
+echo "Max local disk usage: ${cores} BAMs at a time"
 
 parallel \
   --joblog "align_stats_$(date "+%b%d%Y_%H%M%S")_joblog.log" \
   --progress --bar --verbose \
   --jobs "$cores" \
-  align_stats ::: "${local_bams[@]}"
+  align_stats ::: "${bam_gcs_array[@]}"
 
 # 5. Collapse per-sample CSVs into merged output
 cat idxstats/*_chrinfo.csv \
@@ -127,9 +123,6 @@ cat idxstats/*_chrinfo.csv \
   > merged_chr_info.csv
 
 echo "Written: ${OUT_DIR}/merged_chr_info.csv"
-
-# 6. Clean up local BAMs
-echo "Cleaning up tmp BAMs..."
-rm -rf "$TMP_BAM_DIR"
+rmdir "$TMP_BAM_DIR" 2>/dev/null || true  # remove tmp dir if empty
 
 cd "$cwd" || exit 1
