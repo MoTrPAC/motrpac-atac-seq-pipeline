@@ -28,7 +28,7 @@ fi
 
 cores=$1
 CROO_OUTPUT_PATH=${2%/}
-OUT_DIR=$3
+OUT_DIR=$(realpath "$3")
 
 TMP_BAM_DIR="${OUT_DIR}/tmp_bams"
 mkdir -p "$OUT_DIR" "$TMP_BAM_DIR"
