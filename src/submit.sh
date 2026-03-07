@@ -43,7 +43,7 @@ function submit_file() {
   if [ -n "$GCP_OUT_DIR" ]; then
     gcp_out_flag="--gcp-out-dir $GCP_OUT_DIR"
   fi
-  submission_output=$(caper submit -i "$input_json_file" $gcp_out_flag "$WDL_FILE" 2>&1)
+  submission_output=$(caper $gcp_out_flag submit -i "$input_json_file" "$WDL_FILE" 2>&1)
   parsed_output=$(echo "$submission_output" | tail -n1 | sed -E 's/(.*)(\{[^}]*\})/\2/g' | sed -E 's/'\''/\"/g')
   echo "$parsed_output"
   workflow_id=$(echo "$parsed_output" | jq -r '.id')
