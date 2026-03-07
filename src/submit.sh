@@ -29,6 +29,19 @@ if ! command -v caper &>/dev/null; then
   exit 1
 fi
 
+CAPER_CONF="${HOME}/.caper/default.conf"
+
+if [ -n "$GCP_OUT_DIR" ]; then
+  echo "Setting gcp-out-dir to $GCP_OUT_DIR in $CAPER_CONF"
+  cp "$CAPER_CONF" "${CAPER_CONF}.bak"
+  trap 'mv "${CAPER_CONF}.bak" "$CAPER_CONF"' EXIT
+  if grep -q "^gcp-out-dir=" "$CAPER_CONF"; then
+    sed -i "s|^gcp-out-dir=.*|gcp-out-dir=${GCP_OUT_DIR}|" "$CAPER_CONF"
+  else
+    echo "gcp-out-dir=${GCP_OUT_DIR}" >> "$CAPER_CONF"
+  fi
+fi
+
 echo "[" >"$WF_ID_MAP"
 
 function submit_file() {
@@ -39,15 +52,7 @@ function submit_file() {
   local workflow_id
   local json_str
 
-  local conf_flag=""
-  local tmp_conf=""
-  if [ -n "$GCP_OUT_DIR" ]; then
-    tmp_conf=$(mktemp)
-    sed "s|^gcp-out-dir=.*|gcp-out-dir=${GCP_OUT_DIR}|" ~/.caper/default.conf > "$tmp_conf"
-    conf_flag="--conf $tmp_conf"
-  fi
-  submission_output=$(caper $conf_flag submit -i "$input_json_file" "$WDL_FILE" 2>&1)
-  [ -n "$tmp_conf" ] && rm -f "$tmp_conf"
+  submission_output=$(caper submit -i "$input_json_file" "$WDL_FILE" 2>&1)
   parsed_output=$(echo "$submission_output" | tail -n1 | sed -E 's/(.*)(\{[^}]*\})/\2/g' | sed -E 's/'\''/\"/g')
   echo "$parsed_output"
   workflow_id=$(echo "$parsed_output" | jq -r '.id')
@@ -60,7 +65,6 @@ function submit_file() {
 export -f submit_file
 export WDL_FILE
 export WF_ID_MAP
-export GCP_OUT_DIR
 echo "Submitting files in $JSON_DIR"
 parallel --bar --progress --verbose --jobs "$NUM_CORES" submit_file ::: "$JSON_DIR"/*.json
 
