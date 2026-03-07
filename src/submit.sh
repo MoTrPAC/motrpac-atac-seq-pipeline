@@ -2,14 +2,13 @@
 
 if [ $# -lt 4 ]; then
   echo
-  echo "Usage: ./submit.sh [WDL_FILE] [JSON_DIR] [WF_ID_MAP] [NUM_CORES] [GCP_OUT_DIR]"
+  echo "Usage: ./submit.sh [WDL_FILE] [JSON_DIR] [WF_ID_MAP] [NUM_CORES]"
   echo
-  echo "Example: ./submit.sh atac.wdl json/ wfids.json 4 gs://my-bucket/phase1b_output"
-  echo "[WDL_FILE]:     the WDL file to use as the workflow"
-  echo "[JSON_DIR]:     the directory containing JSON files to use as the WDL inputs"
-  echo "[WF_ID_MAP]:    a JSON file to write an array of a map of label and workflow ID of the submitted jobs to"
-  echo "[NUM_CORES]:    the number of parallel submits to do at a time"
-  echo "[GCP_OUT_DIR]:  (optional) GCS output path, overrides gcp-out-dir in caper config"
+  echo "Example: ./submit.sh atac.wdl json/ wfids.json"
+  echo "[WDL_FILE]: the WDL file to use as the workflow"
+  echo "[JSON_DIR]: the directory containing JSON files to use as the WDL inputs"
+  echo "[WF_ID_MAP]: a JSON file to write an array of a map of label and workflow ID of the submitted jobs to"
+  echo "[NUM_CORES]: The number of parallel submits to do at a time"
   echo
   exit 1
 fi
@@ -18,7 +17,6 @@ WDL_FILE=$1
 JSON_DIR=${2/%\//}
 WF_ID_MAP=$3
 NUM_CORES=$4
-GCP_OUT_DIR=${5:-}
 
 if ! [ -f "$WDL_FILE" ]; then
   echo "$WDL_FILE does not exist"
@@ -27,19 +25,6 @@ fi
 if ! command -v caper &>/dev/null; then
   echo "caper not installed" >&2
   exit 1
-fi
-
-CAPER_CONF="${HOME}/.caper/default.conf"
-
-if [ -n "$GCP_OUT_DIR" ]; then
-  echo "Setting gcp-out-dir to $GCP_OUT_DIR in $CAPER_CONF"
-  cp "$CAPER_CONF" "${CAPER_CONF}.bak"
-  trap 'mv "${CAPER_CONF}.bak" "$CAPER_CONF"' EXIT
-  if grep -q "^gcp-out-dir=" "$CAPER_CONF"; then
-    sed -i "s|^gcp-out-dir=.*|gcp-out-dir=${GCP_OUT_DIR}|" "$CAPER_CONF"
-  else
-    echo "gcp-out-dir=${GCP_OUT_DIR}" >> "$CAPER_CONF"
-  fi
 fi
 
 echo "[" >"$WF_ID_MAP"
