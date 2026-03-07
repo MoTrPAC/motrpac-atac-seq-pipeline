@@ -39,11 +39,15 @@ function submit_file() {
   local workflow_id
   local json_str
 
-  local gcp_out_flag=""
+  local conf_flag=""
+  local tmp_conf=""
   if [ -n "$GCP_OUT_DIR" ]; then
-    gcp_out_flag="--gcp-out-dir $GCP_OUT_DIR"
+    tmp_conf=$(mktemp)
+    sed "s|^gcp-out-dir=.*|gcp-out-dir=${GCP_OUT_DIR}|" ~/.caper/default.conf > "$tmp_conf"
+    conf_flag="--conf $tmp_conf"
   fi
-  submission_output=$(caper $gcp_out_flag submit -i "$input_json_file" "$WDL_FILE" 2>&1)
+  submission_output=$(caper $conf_flag submit -i "$input_json_file" "$WDL_FILE" 2>&1)
+  [ -n "$tmp_conf" ] && rm -f "$tmp_conf"
   parsed_output=$(echo "$submission_output" | tail -n1 | sed -E 's/(.*)(\{[^}]*\})/\2/g' | sed -E 's/'\''/\"/g')
   echo "$parsed_output"
   workflow_id=$(echo "$parsed_output" | jq -r '.id')
