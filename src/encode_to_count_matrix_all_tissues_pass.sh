@@ -1,12 +1,14 @@
 #!/bin/bash
 # Author: Nicole Gay, Anna Scherbina
 # Updated: 2026
-# Purpose: Generate peak x sample read counts matrix from tagAlign and peak files
-#          across all phases/tissues. Run extract_atac_from_gcp_pass.sh for each
-#          phase before running this script.
+# Purpose: Generate per-phase peak x sample read counts matrix from tagAlign and
+#          peak files across all tissues within a single phase. Run this script
+#          once per phase (e.g. pass1b-06, pass1ac-06). The master peak file is
+#          built from all batches within the phase, and counts are split by tissue.
+#          Run extract_atac_from_gcp_pass.sh for each phase before running this script.
 #
 # Requirements: bedtools, python3, gsutil, parallel
-#   sudo apt install bedtools
+#   sudo apt install bedtools parallel
 #
 # Usage: bash encode_to_count_matrix_all_tissues_pass.sh \
 #            [NUM_CORES] [OUT_DIR] [SRCDIR] [GCS_FINAL_DIR ...]
@@ -14,13 +16,12 @@
 #   NUM_CORES:      parallel bedtools jobs (~25G RAM per core recommended)
 #   OUT_DIR:        local output directory
 #   SRCDIR:         path to motrpac-atac-seq-pipeline/src
-#   GCS_FINAL_DIR:  one or more GCS paths to phase final dirs
+#   GCS_FINAL_DIR:  one or more GCS paths to batch final dirs within the same phase
 #
-# Example:
+# Example (single phase, multiple site batches):
 #   bash encode_to_count_matrix_all_tissues_pass.sh \
-#       3 ./counts_output ./src \
-#       gs://my-bucket/phase1b_final \
-#       gs://my-bucket/phase1a_final
+#       12 ./counts_pass1b-06 ./src \
+#       gs://my-bucket/pass1b-06
 
 set -Eeuo pipefail
 
