@@ -127,7 +127,7 @@ if (nrow(m2) != nrow(m1)) {
 # remove columns of all 0 or all 100
 check_col <- function(x) {
   if (is.numeric(x)) {
-    if (sum(as.numeric(x)) == 0 | all(x == 100)) {
+    if (sum(as.numeric(x), na.rm=TRUE) == 0 | all(x == 100, na.rm=TRUE)) {
       return(x)
     }
   }
