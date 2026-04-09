@@ -549,7 +549,7 @@ python src/get_execution_status.py /path/to/output/file.json
 If running on GCP, mount the output directory to your local machine. This will allow you to access the pipeline outputs from your local machine. If running on the SCG, you can skip this step.
 
 ```bash
-gcsfuse --implicit-dirs --dir-mode 777 --file-mode 777 my_bucket/outputs /mnt/${OUTDIR}
+gcsfuse --implicit-dirs --dir-mode 777 --file-mode 777 --only-dir outputs my_bucket /mnt/${OUTDIR}
 ```
 
 ### 5.2 Collect important outputs with `croo`
