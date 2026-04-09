@@ -19,7 +19,8 @@ WF_ID_MAP=$3
 NUM_CORES=$4
 
 if ! [ -f "$WDL_FILE" ]; then
-  echo "$WDL_FILE does not exist"
+  echo "$WDL_FILE does not exist" >&2
+  exit 1
 fi
 
 if ! command -v caper &>/dev/null; then
