@@ -1,11 +1,11 @@
 #!/bin/bash
 
-# Usage: ./process_batches_v3.sh <batches_tsv_file> [output_dir] [--per-batch]
+# Usage: ./process_batches_gcp.sh <batches_tsv_file> [output_dir] [--per-batch]
 
 if [ $# -lt 1 ]; then
   echo "Usage: $0 <batches_tsv_file> [output_dir] [--per-batch]"
-  echo "Example: $0 batches.tsv config_output_v3"
-  echo "Example: $0 batches.tsv config_output_v3 --per-batch"
+  echo "Example: $0 batches.tsv config_output"
+  echo "Example: $0 batches.tsv config_output --per-batch"
   echo ""
   echo "Options:"
   echo "  --per-batch  Process batches separately instead of combining."
@@ -14,7 +14,7 @@ if [ $# -lt 1 ]; then
 fi
 
 BATCHES_FILE="$1"
-OUTPUT_DIR="${2:-config_output_v3}"
+OUTPUT_DIR="${2:-config_output}"
 PER_BATCH_FLAG=""
 
 # Check for --per-batch flag in any position
@@ -45,7 +45,7 @@ echo "  - Data dictionary from src/meta_pass_data_dict.txt"
 echo "  - Reference standards from testing/Stanford_StandardReferenceMaterial.txt"
 echo ""
 
-python3 src/make_json_replicates_v3.py \
+python3 src/make_json_replicates_gcp.py \
   -j ./examples/base.json \
   -r ./testing/Stanford_StandardReferenceMaterial.txt \
   -d ./src/meta_pass_data_dict.txt \
