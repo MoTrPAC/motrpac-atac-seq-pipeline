@@ -61,20 +61,27 @@ def main():
                 continue
 
             chrom = fields[0]
-            gene_id = fields[8].split(';')[0].split(' ')[1]
-            gene_id = re.sub('"', '', gene_id)
 
+            # Parse all attributes into a dict to avoid assumptions about order or spacing
+            attrs = {}
             for attr in fields[8].split(';'):
-                if 'gene_biotype' in attr:
-                    gene_type = attr.split(' ')[2]
-                    gene_type = re.sub('"', '', gene_type)
-                    if gene_type != 'protein_coding':
-                        continue
+                attr = attr.strip()
+                if not attr:
+                    continue
+                m = re.match(r'(\w+)\s+"([^"]+)"', attr)
+                if m:
+                    attrs[m.group(1)] = m.group(2)
 
-                    end = tss
-                    start = int(tss) - 1
-                    out.write('\t'.join([chrom, str(start), end, gene_id, '0', strand]) + '\n')
-                    tss_count += 1
+            gene_id = attrs.get('gene_id')
+            gene_type = attrs.get('gene_biotype')
+
+            if not gene_id or gene_type != 'protein_coding':
+                continue
+
+            end = tss
+            start = int(tss) - 1
+            out.write('\t'.join([chrom, str(start), end, gene_id, '0', strand]) + '\n')
+            tss_count += 1
 
     print(f"Extracted {tss_count} TSS entries from protein_coding genes")
 
