@@ -86,18 +86,22 @@ align_stats() {
   local total y x mt auto contig
   local pct_y pct_x pct_mt pct_auto pct_contig
 
-  total=$(awk '{sum+=$3;}END{print sum;}' "idxstats/${viallabel}_chrinfo.txt")
-  y=$(grep -E "^chrY" "idxstats/${viallabel}_chrinfo.txt" | head -1 | cut -f 3)
-  x=$(grep -E "^chrX" "idxstats/${viallabel}_chrinfo.txt" | head -1 | cut -f 3)
-  mt=$(grep -E "^chrM" "idxstats/${viallabel}_chrinfo.txt" | head -1 | cut -f 3)
-  auto=$(grep -E "^chr[0-9]" "idxstats/${viallabel}_chrinfo.txt" | cut -f 3 | awk '{sum+=$1;}END{print sum;}')
-  contig=$(grep -E -v "^chr" "idxstats/${viallabel}_chrinfo.txt" | cut -f 3 | awk '{sum+=$1;}END{print sum;}')
+  total=$(awk '{sum+=$3;}END{print sum+0;}' "idxstats/${viallabel}_chrinfo.txt")
+  y=$(grep -E "^chrY" "idxstats/${viallabel}_chrinfo.txt" | head -1 | cut -f 3); y=${y:-0}
+  x=$(grep -E "^chrX" "idxstats/${viallabel}_chrinfo.txt" | head -1 | cut -f 3); x=${x:-0}
+  mt=$(grep -E "^chrM" "idxstats/${viallabel}_chrinfo.txt" | head -1 | cut -f 3); mt=${mt:-0}
+  auto=$(grep -E "^chr[0-9]" "idxstats/${viallabel}_chrinfo.txt" | cut -f 3 | awk '{sum+=$1;}END{print sum+0;}')
+  contig=$(grep -E -v "^chr" "idxstats/${viallabel}_chrinfo.txt" | cut -f 3 | awk '{sum+=$1;}END{print sum+0;}')
 
-  pct_y=$(echo "scale=5; ${y}/${total}*100" | bc -l | sed 's/^\./0./')
-  pct_x=$(echo "scale=5; ${x}/${total}*100" | bc -l | sed 's/^\./0./')
-  pct_mt=$(echo "scale=5; ${mt}/${total}*100" | bc -l | sed 's/^\./0./')
-  pct_auto=$(echo "scale=5; ${auto}/${total}*100" | bc -l | sed 's/^\./0./')
-  pct_contig=$(echo "scale=5; ${contig}/${total}*100" | bc -l | sed 's/^\./0./')
+  if [ "${total}" -eq 0 ]; then
+    pct_y=0; pct_x=0; pct_mt=0; pct_auto=0; pct_contig=0
+  else
+    pct_y=$(echo "scale=5; ${y}/${total}*100" | bc -l | sed 's/^\./0./')
+    pct_x=$(echo "scale=5; ${x}/${total}*100" | bc -l | sed 's/^\./0./')
+    pct_mt=$(echo "scale=5; ${mt}/${total}*100" | bc -l | sed 's/^\./0./')
+    pct_auto=$(echo "scale=5; ${auto}/${total}*100" | bc -l | sed 's/^\./0./')
+    pct_contig=$(echo "scale=5; ${contig}/${total}*100" | bc -l | sed 's/^\./0./')
+  fi
 
   echo 'viallabel,total_primary_alignments,pct_chrX,pct_chrY,pct_chrM,pct_auto,pct_contig' > "idxstats/${viallabel}_chrinfo.csv"
   echo "${viallabel},${total},${pct_x},${pct_y},${pct_mt},${pct_auto},${pct_contig}" >> "idxstats/${viallabel}_chrinfo.csv"
