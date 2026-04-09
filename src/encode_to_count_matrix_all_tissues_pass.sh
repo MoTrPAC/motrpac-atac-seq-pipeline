@@ -1,79 +1,154 @@
 #!/bin/bash
-set -Eeuxo pipefail
-trap "echo ERR trap fired!" ERR
-# Author: Nicole Gay, Anna Scherbina 
-# Updated: 7 May 2020 
-# Script : encode_to_count_matrix.sh 
-# Purpose: generate peak x sample read counts matrix from tagAlign and hammock files 
-# Run pass_extract_from_gcp.sh before this 
+# Author: Nicole Gay, Anna Scherbina
+# Updated: 2026
+# Purpose: Generate per-phase peak x sample read counts matrix from tagAlign and
+#          peak files across all tissues within a single phase. Run this script
+#          once per phase (e.g. pass1b-06, pass1ac-06). The master peak file is
+#          built from all batches within the phase, and counts are split by tissue.
+#          Run extract_atac_from_gcp_pass.sh for each phase before running this script.
+#
+# Requirements: bedtools, python3, gsutil, parallel
+#   sudo apt install bedtools parallel
+#
+# Usage: bash encode_to_count_matrix_all_tissues_pass.sh \
+#            [NUM_CORES] [OUT_DIR] [SRCDIR] [GCS_FINAL_DIR ...]
+#
+#   NUM_CORES:      parallel bedtools jobs (~25G RAM per core recommended)
+#   OUT_DIR:        local output directory
+#   SRCDIR:         path to motrpac-atac-seq-pipeline/src
+#   GCS_FINAL_DIR:  one or more GCS paths to batch final dirs within the same phase
+#
+# Example (single phase, multiple site batches):
+#   bash encode_to_count_matrix_all_tissues_pass.sh \
+#       12 ./counts_pass1b-06 ./src \
+#       gs://my-bucket/pass1b-06
 
-#get a merged peak file       
+set -Eeuo pipefail
 
-#module load miniconda/3 # for python3
-#module load bedtools
+if [ $# -lt 4 ]; then
+  echo
+  echo "Usage: bash encode_to_count_matrix_all_tissues_pass.sh [NUM_CORES] [OUT_DIR] [SRCDIR] [GCS_FINAL_DIR ...]"
+  echo
+  exit 1
+fi
 
-############################################################
-## USER-DEFINED VARIABLES 
-#indir=~/test_mnt/PASS/atac-seq/stanford/batch5_20200929/Output/final # same as ${base} from running pass_extract_from_gcp.sh
-#indir=~/test_mnt/PASS/atac-seq/stanford
-indir=~/test_mnt/PASS/atac-seq
-srcdir=~/motrpac-atac-seq-pipeline/src # directory with truncate_narrowpeak_200bp_summit.py
-#batch_file=/home/araja7/motrpac-atac-seq-pipeline_code_dev/src/test_batch.txt
-batch_file=/home/araja7/pp/test_batch.txt
-final_results_dir=test_merge_pass1ac
-#3 worked on gcp , 8 crashes the system current gcp vm with 60gb ram
-cores=3 # number of cores allocated for parallelization 
-# need ~25G per core. 10G was too low 
-############################################################
+NUM_CORES=$1
+OUT_DIR=$(realpath "$2")
+SRCDIR=$(realpath "$3")
+shift 3
+GCS_FINAL_DIRS=("$@")
 
-outdir=${indir}/${final_results_dir}/merged_peaks 
-mkdir -p ${outdir}
-cd ${indir}
-#concatenate peaks (narrowpeak.gz)
-for i in `cat ${batch_file}`;do
-	cat ${indir}/$i/Output/final/peak/*narrowPeak.gz >>${outdir}/overlap.optimal_peak.narrowPeak.bed.gz
+MERGED_PEAKS_DIR="${OUT_DIR}/merged_peaks"
+COUNTS_DIR="${OUT_DIR}/counts_matrix"
+TMP_TAG_DIR="${OUT_DIR}/tmp_tagalign"
+
+mkdir -p "$MERGED_PEAKS_DIR" "$COUNTS_DIR" "$TMP_TAG_DIR"
+
+##############################################################
+## Step 1: Download and concatenate all peak files
+##############################################################
+echo "=== Step 1: Concatenating peak files ==="
+CONCAT_PEAKS="${MERGED_PEAKS_DIR}/overlap.optimal_peak.narrowPeak.bed.gz"
+rm -f "$CONCAT_PEAKS"
+
+for gcs_dir in "${GCS_FINAL_DIRS[@]}"; do
+  echo "  Getting peaks from ${gcs_dir}/peak/ ..."
+  gsutil ls "${gcs_dir}/peak/*.narrowPeak.gz" | while read -r peak_file; do
+    echo "    Appending $(basename "$peak_file")..."
+    gsutil cat "$peak_file" >> "$CONCAT_PEAKS"
+  done
 done
-echo "Success! done concatenating peak files from all tissues"
+echo "Done concatenating peaks"
 
-#truncate peaks to 200 bp around summit
-python ${srcdir}/truncate_narrowpeak_200bp_summit.py --infile ${outdir}/overlap.optimal_peak.narrowPeak.bed.gz --outfile ${outdir}/overlap.optimal_peak.narrowPeak.200.bed.gz
-echo "Success! finished truncating peaks"
+##############################################################
+## Step 2: Truncate peaks to 200bp around summit
+##############################################################
+echo "=== Step 2: Truncating peaks to 200bp around summit ==="
+TRUNCATED_PEAKS="${MERGED_PEAKS_DIR}/overlap.optimal_peak.narrowPeak.200.bed.gz"
+python3 "${SRCDIR}/truncate_narrowpeak_200bp_summit.py" \
+  --infile "$CONCAT_PEAKS" \
+  --outfile "$TRUNCATED_PEAKS"
+echo "Done truncating peaks"
 
-# sort and merge peaks --> master peak file 
-zcat ${outdir}/overlap.optimal_peak.narrowPeak.200.bed.gz | bedtools sort | bedtools merge > ${outdir}/overlap.optimal_peak.narrowPeak.200.sorted.merged.bed
-echo "Success! Finished sorting and merging"
+##############################################################
+## Step 3: Sort and merge → master peak file
+##############################################################
+echo "=== Step 3: Sorting and merging peaks ==="
+MASTER_PEAKS="${MERGED_PEAKS_DIR}/overlap.optimal_peak.narrowPeak.200.sorted.merged.bed"
+zcat "$TRUNCATED_PEAKS" | bedtools sort | bedtools merge > "$MASTER_PEAKS"
+echo "Done: $(wc -l < "$MASTER_PEAKS") peaks in master file"
 
-# intersect with tagalign files 
-mkdir -p ${indir}/${final_results_dir}/counts_matrix
-intersect_tag () {
-	local tag=$1
-	local results_dir=$(ls|grep "final")
-	#echo "results dir is" ${results_dir}
-	#echo "tag is" ${tag}
-	local viallabel=$(basename $tag | sed "s/_.*//")
-	echo ${viallabel} > ${results_dir}/counts_matrix/counts.${viallabel}.txt
-	bedtools coverage -nonamecheck -counts -a ${results_dir}/merged_peaks/overlap.optimal_peak.narrowPeak.200.sorted.merged.bed -b ${tag} | cut -f4 >> ${results_dir}/counts_matrix/counts.${viallabel}.txt
+##############################################################
+## Step 4: Intersect tagAlign files with master peak file
+##          Each job downloads its tagAlign, runs bedtools, then deletes
+##############################################################
+echo "=== Step 4: Counting reads per peak per sample ==="
+
+intersect_tag() {
+  local tag_gcs=$1
+  local viallabel
+  viallabel=$(basename "$tag_gcs" | sed "s/_.*//")
+  local out="${COUNTS_DIR}/counts.${viallabel}.txt"
+
+  if [ -f "$out" ]; then
+    echo "Skipping $viallabel (already done)"
+    return
+  fi
+
+  local local_tag="${TMP_TAG_DIR}/${viallabel}.tagAlign.gz"
+  echo "Copying ${viallabel}..."
+  gsutil cp "$tag_gcs" "$local_tag"
+
+  echo "$viallabel" > "$out"
+  bedtools coverage -nonamecheck -counts \
+    -a "$MASTER_PEAKS" \
+    -b "$local_tag" | cut -f4 >> "$out"
+
+  rm -f "$local_tag"
+  echo "Done: $viallabel"
 }
 export -f intersect_tag
+export COUNTS_DIR TMP_TAG_DIR MASTER_PEAKS
 
-for i in `cat ${batch_file}`;do
-	tag_align=$(ls $i/Output/final/tagalign/*tagAlign.gz)
-	echo ${tag_align}
-	echo ${final_results_dir}
-	parallel --verbose --jobs ${cores} intersect_tag ::: $(echo ${tag_align})
-done	
-
-echo -e $'chrom\tstart\tend' > ${indir}/${final_results_dir}/index
-cat ${outdir}/overlap.optimal_peak.narrowPeak.200.sorted.merged.bed >> ${indir}/${final_results_dir}/index
-
-#split the results counts matrix by tissue
-#to do : reimplement in python
-cd ${indir}/${final_results_dir}/counts_matrix
-ls *|awk -F "." '{print $2}'|awk '{print substr($1,8,2)}'|cut -f1|sort|uniq >>${indir}/${final_results_dir}/tmp_tids.txt
-for i in `cat ${indir}/${final_results_dir}/tmp_tids.txt`;do
-	paste ${indir}/${final_results_dir}/index counts.*$i??.txt >${indir}/${final_results_dir}/t$i.atac.counts.txt
-	gzip ${indir}/${final_results_dir}/t$i.atac.counts.txt
+# Collect all tagAlign GCS paths across all phase dirs
+all_tags=()
+for gcs_dir in "${GCS_FINAL_DIRS[@]}"; do
+  while IFS= read -r tag; do
+    all_tags+=("$tag")
+  done < <(gsutil ls "${gcs_dir}/tagalign/*.tagAlign.gz")
 done
-rm ${indir}/${final_results_dir}/tmp_tids.txt
-rm ${indir}/${final_results_dir}/index
-echo "Success generating counts matrix"
+echo "Found ${#all_tags[@]} tagAlign files"
+
+parallel \
+  --joblog "${OUT_DIR}/counts_matrix_$(date "+%b%d%Y_%H%M%S")_joblog.log" \
+  --progress --bar --verbose \
+  --jobs "$NUM_CORES" \
+  intersect_tag ::: "${all_tags[@]}"
+
+##############################################################
+## Step 5: Build genomic index and split counts by tissue
+##############################################################
+echo "=== Step 5: Splitting count matrix by tissue ==="
+
+INDEX="${OUT_DIR}/index"
+echo -e "chrom\tstart\tend" > "$INDEX"
+cat "$MASTER_PEAKS" >> "$INDEX"
+
+cd "$COUNTS_DIR"
+# Extract unique 2-digit tissue IDs from vial labels (characters 8-9)
+ls counts.*.txt \
+  | awk -F "." '{print $2}' \
+  | awk '{print substr($1,8,2)}' \
+  | sort | uniq > "${OUT_DIR}/tmp_tids.txt"
+
+while read -r tid; do
+  echo "  Generating t${tid}.atac.counts.txt.gz ..."
+  paste "$INDEX" counts.*${tid}??.txt > "${OUT_DIR}/t${tid}.atac.counts.txt"
+  gzip "${OUT_DIR}/t${tid}.atac.counts.txt"
+done < "${OUT_DIR}/tmp_tids.txt"
+
+rm "${OUT_DIR}/tmp_tids.txt" "$INDEX"
+rmdir "$TMP_TAG_DIR" 2>/dev/null || true
+
+echo "=== Done! ==="
+ls "${OUT_DIR}"/t*.atac.counts.txt.gz

@@ -13,8 +13,9 @@ option_list <- list(
   make_option(c("-q", "--atac_qc"), help = "Absolute path to pipeline qc metrics file output of qc2tsv tool, e.g. atac_qc.tsv"),
   make_option(c("-m", "--sample_mapping_file"), help = "Absolute path to replicate to sample mapping file, e.g. rep_to_sample_map.csv"),
   make_option(c("-a", "--align_stats"), help = "Absolute path to genome alignment stats file, e.g. merged_chr_info.csv"),
-  make_option(c("-o", "--outdir", help = "Absolute path to output directory for the merged qc reports"))
-
+  make_option(c("-o", "--outdir"), help = "Absolute path to output directory for the merged qc reports"),
+  make_option(c("-r", "--relaxed"), action = "store_true", default = FALSE,
+              help = "Allow missing samples — drop unmatched vial labels with warnings instead of stopping (default: strict)")
 )
 
 opt_parse_inst <- OptionParser(option_list = option_list)
@@ -89,24 +90,44 @@ viallabel_qc <- encode[, colnames(encode)[!colnames(encode) %in% workflow_level]
 # match rep to viallabel
 colnames(rep_to_sample_map) <- c('general.description', 'replicate', 'viallabel')
 dt <- merge(viallabel_qc, rep_to_sample_map, by = c('general.description', 'replicate'))
-stopifnot(nrow(dt) == nrow(viallabel_qc))
+if (nrow(dt) != nrow(viallabel_qc)) {
+  missing <- setdiff(paste(viallabel_qc$general.description, viallabel_qc$replicate),
+                     paste(dt$general.description, dt$replicate))
+  msg <- paste0(length(missing), " sample(s) from QC data not found in rep_to_sample_map and will be dropped: ",
+                paste(missing, collapse = ', '))
+  if (isTRUE(opt$relaxed)) message("WARNING: ", msg) else stop(msg)
+}
 
 ###################################################################################
 ## merge all sample-level QC
 ###################################################################################
 
+# detect vial label column name in metadata (vial_label, viallabel, or vialLabel)
+vl_col <- intersect(colnames(wet), c('vial_label', 'viallabel', 'vialLabel'))
+if (length(vl_col) == 0) stop("Could not find vial label column in sample metadata. Expected one of: vial_label, viallabel, vialLabel")
+vl_col <- vl_col[1]
+message("Using metadata vial label column: ", vl_col)
+
 # merge with wet lab QC
-print(dt$viallabel)
-print(wet$vial_label)
-m1 <- merge(dt, wet, by.x = 'viallabel', by.y = 'vial_label')
-stopifnot(nrow(m1) == nrow(dt))
+m1 <- merge(dt, wet, by.x = 'viallabel', by.y = vl_col)
+if (nrow(m1) != nrow(dt)) {
+  missing <- setdiff(dt$viallabel, wet[[vl_col]])
+  msg <- paste0(length(missing), " vial label(s) from QC data not found in sample metadata and will be dropped: ",
+                paste(missing, collapse = ', '))
+  if (isTRUE(opt$relaxed)) message("WARNING: ", msg) else stop(msg)
+}
 # merge with align stats
 m2 <- merge(m1, align_stat, by = 'viallabel')
-stopifnot(nrow(m2) == nrow(dt))
+if (nrow(m2) != nrow(m1)) {
+  missing <- setdiff(m1$viallabel, align_stat$viallabel)
+  msg <- paste0(length(missing), " vial label(s) not found in align stats and will be dropped: ",
+                paste(missing, collapse = ', '))
+  if (isTRUE(opt$relaxed)) message("WARNING: ", msg) else stop(msg)
+}
 # remove columns of all 0 or all 100
 check_col <- function(x) {
   if (is.numeric(x)) {
-    if (sum(as.numeric(x)) == 0 | all(x == 100)) {
+    if (sum(as.numeric(x), na.rm=TRUE) == 0 | all(x == 100, na.rm=TRUE)) {
       return(x)
     }
   }
