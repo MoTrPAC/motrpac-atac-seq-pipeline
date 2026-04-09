@@ -42,12 +42,15 @@ echo "  - Sample metadata files from each batch"
 echo "  - Phenotype data from gs://motrpac-data-hub/phenotype/rat/"
 echo "  - BIC Label Data from gs://motrpac-portal-transfer-dmaqc/"
 echo "  - Data dictionary from src/meta_pass_data_dict.txt"
-echo "  - Reference standards from testing/Stanford_StandardReferenceMaterial.txt"
+echo "  - Reference standards from resources/Stanford_StandardReferenceMaterial.txt"
+echo "    (identifies reference standard samples by MTP_RefLabel; samples with no phenotype"
+echo "     match are checked against this file. Source:"
+echo "     gs://motrpac-portal-transfer-stanford/atac-seq/rat/batch1_20191025/metadata/Stanford_StandardReferenceMaterial.txt)"
 echo ""
 
 python3 src/make_json_replicates_gcp.py \
   -j ./examples/base.json \
-  -r ./testing/Stanford_StandardReferenceMaterial.txt \
+  -r ./resources/Stanford_StandardReferenceMaterial.txt \
   -d ./src/meta_pass_data_dict.txt \
   -b "$BATCHES_FILE" \
   -o "$OUTPUT_DIR" \
