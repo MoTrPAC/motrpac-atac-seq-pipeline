@@ -842,7 +842,7 @@ def main():
         if 'protocol_label' in df_combined.columns:
             group_cols.append('protocol_label')
 
-        print(f"Grouping by: {group_cols}")
+        print(f"Grouping columns selected: {len(group_cols)}")
         if args.per_batch:
             print("  (per-batch mode: batches processed separately)")
 
