@@ -58,6 +58,11 @@ done)
 n_bams=$(echo "$bam_gcs_paths" | grep -c "." || true)
 echo "Found ${n_bams} genome BAMs"
 
+if [ "$n_bams" -eq 0 ]; then
+  echo "ERROR: No genome BAM paths were extracted from CROO filetables under ${CROO_OUTPUT_PATH}" >&2
+  echo "Check whether the filetable format changed or the extraction filters are too strict." >&2
+  exit 1
+fi
 # 3. Run align_stats in parallel — each job copies its own BAM, processes it, then deletes it
 #    This keeps disk usage bounded to (cores × BAM size) rather than (all BAMs × BAM size)
 align_stats() {
