@@ -359,8 +359,9 @@ def load_sample_metadata_for_batch(batch_num, blob_path, bucket_base, batch_labe
             df = pd.read_csv(pattern)
             return df
     except:
+    except subprocess.CalledProcessError as e:
+        print(f"  Error listing specific file: {e}")
         pass
-
     # Try DMAQC metadata file (Sinai format)
     try:
         dmaqc_pattern = f"{bucket_base}/{blob_path}/metadata_dmaqc_*.csv"
