@@ -411,8 +411,7 @@ def clean_description(desc):
     return desc
 
 
-def write_json_config(outfile, base_json_path, description, replicates, fastq_list_all,
-                      age_group=None, protocol=None):
+def write_json_config(outfile, base_json_path, description, replicates, fastq_list_all):
     """Write JSON configuration file for a set of replicates
 
     Parameters
@@ -427,10 +426,6 @@ def write_json_config(outfile, base_json_path, description, replicates, fastq_li
         List of replicate IDs
     fastq_list_all : list
         List of all FASTQ files
-    age_group : str, optional
-        Unused. Retained for call-site compatibility.
-    protocol : str, optional
-        Unused. Retained for call-site compatibility.
     """
     with open(base_json_path, 'r') as f:
         base_json = f.read()
@@ -882,17 +877,6 @@ def main():
                     continue
 
                 # Extract BIC metadata from the group (use first non-null value)
-                age_group = None
-                protocol = None
-                if 'ageGroup_label' in group.columns:
-                    age_group_vals = group['ageGroup_label'].dropna().unique()
-                    if len(age_group_vals) > 0:
-                        age_group = str(age_group_vals[0])
-                if 'protocol_label' in group.columns:
-                    protocol_vals = group['protocol_label'].dropna().unique()
-                    if len(protocol_vals) > 0:
-                        protocol = str(protocol_vals[0])
-
                 # In per-batch mode, filter FASTQs to only include files from this batch
                 if args.per_batch and batch_name:
                     batch_fastq_list = [f for f in combined_fastq_list if fastq_to_batch.get(f) == batch_name]
@@ -900,8 +884,7 @@ def main():
                     batch_fastq_list = combined_fastq_list
 
                 outfile = os.path.join(args.outdir, f'{description}.json')
-                write_json_config(outfile, args.json, description, replicates, batch_fastq_list,
-                                age_group=age_group, protocol=protocol)
+                write_json_config(outfile, args.json, description, replicates, batch_fastq_list)
 
                 # Get PIDs for this group (if pid_col exists)
                 group_pids = set()
