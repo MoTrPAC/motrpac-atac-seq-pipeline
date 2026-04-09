@@ -57,7 +57,7 @@ def main():
             elif strand == '-':
                 tss = fields[4]
             else:
-                print(f'Warning: Strand not recognized for line: {line[:100]}...')
+                print(f'Warning: Strand not recognized for line: {line[:100]}...', file=sys.stderr)
                 continue
 
             chrom = fields[0]
