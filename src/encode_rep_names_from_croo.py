@@ -23,7 +23,7 @@ def main(gcp_path: str, output_path: str, gcp_project: str):
     fs = gcsfs.GCSFileSystem(project=gcp_project)
 
     # List label directories directly under croo output path
-    label_dirs = [p for p in fs.ls(gcp_path.lstrip("gs://")) if fs.isdir(p)]
+    label_dirs = [p for p in fs.ls(gcp_path.removeprefix("gs://")) if fs.isdir(p)]
 
     cond_l = []
     rep_l = []
