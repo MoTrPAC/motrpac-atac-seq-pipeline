@@ -25,8 +25,8 @@ def open_file(filename, mode='r'):
 
 def main():
     if len(sys.argv) != 3:
-        print("Usage: python tss_from_gtf.py <gtf_file> <tss_outfile>")
-        print("Supports both compressed (.gz) and uncompressed GTF files.")
+        print("Usage: python tss_from_gtf.py <gtf_file> <tss_outfile>", file=sys.stderr)
+        print("Supports both compressed (.gz) and uncompressed GTF files.", file=sys.stderr)
         sys.exit(1)
 
     in_gtf = sys.argv[1]
