@@ -1,0 +1,75 @@
+column	key	val
+sex	1	Female
+sex	2	Male
+Protocol	1	Phase 1A
+Protocol	2	Phase 1B
+Protocol	4	Phase 1C
+intervention	1	Exercise (Phase 1A)
+intervention	2	Training (Phase 1B)
+intervention	3	Control
+sacrificeTime	1	Immediate Post Exercise (Phase 1A and 1C)
+sacrificeTime	2	0.5 hour (Phase 1A and 1C)
+sacrificeTime	3	1 hour (Phase 1A and 1C)
+sacrificeTime	4	4 hour (Phase 1A and 1C)
+sacrificeTime	5	7 hour (Phase 1A)
+sacrificeTime	6	24 hour (Phase 1A)
+sacrificeTime	7	48 hour (Phase 1A)
+sacrificeTime	8	1 week of training or control time (Phase 1B)
+sacrificeTime	9	2 weeks of training (Phase 1B)
+sacrificeTime	10	4 weeks of training (Phase 1B)
+sacrificeTime	11	8 weeks of training or control time (Phase 1B)
+sacrificeTime	12	0 hour (Phase 1C)
+siteName	910	Joslin
+siteName	930	University of Florida
+siteName	940	University of Iowa
+sampleTypeCode	30	Rat Blood RNA
+sampleTypeCode	31	Rat Plasma
+sampleTypeCode	32	Rat Packed Cells
+sampleTypeCode	33	Rat Hippocampus
+sampleTypeCode	34	Rat Cortex
+sampleTypeCode	35	Rat Hypothalamus
+sampleTypeCode	36	Rat Gastrocnemius
+sampleTypeCode	37	Rat Vastus Lateralis
+sampleTypeCode	38	Rat Tibia
+sampleTypeCode	39	Rat Heart
+sampleTypeCode	40	Rat Kidney
+sampleTypeCode	41	Rat Adrenals
+sampleTypeCode	42	Rat Colon
+sampleTypeCode	43	Rat Spleen
+sampleTypeCode	44	Rat Testes
+sampleTypeCode	45	Rat Ovaries
+sampleTypeCode	46	Rat Brown Adipose
+sampleTypeCode	47	Rat White Adipose
+sampleTypeCode	48	Rat Aorta
+sampleTypeCode	49	Rat Lung
+sampleTypeCode	50	Rat Small Intestine
+sampleTypeCode	51	Rat Liver
+sampleTypeCode	52	Rat Hippocampus Powder
+sampleTypeCode	53	Rat Cortex Powder
+sampleTypeCode	54	Rat Hypothalamus Powder
+sampleTypeCode	55	Rat Gastrocnemius Powder
+sampleTypeCode	56	Rat Vastus Lateralis Powder
+sampleTypeCode	57	Rat Tibia Powder
+sampleTypeCode	58	Rat Heart Powder
+sampleTypeCode	59	Rat Kidney Powder
+sampleTypeCode	60	Rat Adrenal Powder
+sampleTypeCode	61	Rat Colon Powder
+sampleTypeCode	62	Rat Spleen Powder
+sampleTypeCode	63	Rat Testes Powder
+sampleTypeCode	64	Rat Ovaries Powder
+sampleTypeCode	65	Rat Aorta Powder
+sampleTypeCode	66	Rat Lung Powder
+sampleTypeCode	67	Rat Small Intestine Powder
+sampleTypeCode	68	Rat Liver Powder
+sampleTypeCode	69	Rat Brown Adipose Powder
+sampleTypeCode	70	Rat White Adipose Powder
+sampleTypeCode	71	Rat Soleus
+sampleTypeCode	72	Rat Plantaris
+sampleTypeCode	73	Rat Tibialis Anterior
+sampleTypeCode	74	Rat Feces
+sampleTypeCode	75	Rat Femur (70% Ethanol)
+sampleTypeCode	76	Rat Medial Gastrocnemius (Histology)
+sampleTypeCode	77	Rat Lateral Gastrocnemius (Histology)
+sampleTypeCode	78	Rat Plantaris (Histology)
+sampleTypeCode	79	Rat Soleus (Histology)
+sampleTypeCode	99	Vena Cava Powder

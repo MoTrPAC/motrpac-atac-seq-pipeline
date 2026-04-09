@@ -491,10 +491,24 @@ Running the pipeline with replicates outputs all of the same per-sample informat
 
 A configuration (config) file in JSON format that specifies input parameters is required to run the pipeline. Find comprehensive documentation of definable parameters [here](https://github.com/ENCODE-DCC/atac-seq-pipeline/blob/master/docs/input.md).
 
-Please click the appropriate link below for detailed instructions on how to automate the generation of config files for pipelines with singletons or replicates. This is particularly important for PASS data, as this repository provides a script to automatically group replicates in the same condition (protocol/timepoint/tissue/sex).
+For PASS (rat) samples running on GCP, use [`src/process_batches_gcp.sh`](src/process_batches_gcp.sh) to automatically generate config files grouped by condition (protocol/timepoint/tissue/sex). This script calls [`src/make_json_replicates_gcp.py`](src/make_json_replicates_gcp.py), which pulls sample metadata from GCS, merges with phenotype data and BIC label data, and writes one JSON config per condition group.
 
-- [Prepare config files for replicates (PASS/rat)](docs/replicate_config.md)
-- [Prepare config files for singletons (CASS/human)](docs/single_config.md)
+```bash
+bash src/process_batches_gcp.sh resources/batches_combined.tsv config_output/
+```
+
+Use `--per-batch` to generate separate config files per sequencing batch instead of combining across batches:
+
+```bash
+bash src/process_batches_gcp.sh resources/batches_combined.tsv config_output/ --per-batch
+```
+
+The script outputs config JSON files and a `config_summary.tsv` with FASTQ counts, vial labels, and PIDs per config. Base pipeline parameters (genome TSV, pipeline type, etc.) are defined in [`examples/base.json`](examples/base.json).
+
+The `-r` argument expects a reference standards metadata file (`resources/Stanford_StandardReferenceMaterial.txt`). Samples that have no match in the phenotype data are checked against this file by `MTP_RefLabel` to identify reference standards and generate their configs separately. The file can be obtained from:
+`gs://motrpac-portal-transfer-stanford/atac-seq/rat/batch1_20191025/metadata/Stanford_StandardReferenceMaterial.txt`
+
+For singletons (CASS/human), see [docs/single_config.md](docs/single_config.md).
 
 ### 4.2 Run the pipeline
 
