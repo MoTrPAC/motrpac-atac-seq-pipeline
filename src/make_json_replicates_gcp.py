@@ -530,9 +530,9 @@ def main():
             break
 
     print(f"\nUsing phenotype columns:")
-    print(f"  Intervention: {intervention_col}")
-    print(f"  Sex: {sex_col}")
-    print(f"  Sacrifice time: {sacrifice_time_col}")
+    print(f"  Intervention: {'FOUND' if intervention_col is not None else 'MISSING'}")
+    print(f"  Sex: {'FOUND' if sex_col is not None else 'MISSING'}")
+    print(f"  Sacrifice time: {'FOUND' if sacrifice_time_col is not None else 'MISSING'}")
 
     # Read batches file
     # Support both 2-column and 3-column formats:
