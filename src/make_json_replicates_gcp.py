@@ -346,7 +346,8 @@ def load_sample_metadata_for_batch(batch_num, blob_path, bucket_base, batch_labe
             print(f"  Loading sample metadata: {file_path}")
             df = pd.read_csv(file_path)
             return df
-    except:
+    except subprocess.CalledProcessError as e:
+        print(f"  Error listing files with wildcard pattern: {e}")
         pass
 
     # Fallback to sample_metadata.csv without date suffix
