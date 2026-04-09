@@ -190,12 +190,23 @@ def load_bic_label_data(dict_path: str, data_path: str) -> pd.DataFrame:
     return df_bic
 
 
+def _gcs_ls(gcs_path: str) -> list[str]:
+    """List blobs matching a GCS path prefix using the storage client."""
+    # gcs_path may be gs://bucket/prefix or gs://bucket/prefix/*.fastq.gz
+    # Strip gs:// and split into bucket + prefix
+    path = gcs_path.lstrip("gs://")
+    bucket_name, _, prefix = path.partition("/")
+    # Strip any trailing glob wildcard component for prefix matching
+    prefix = prefix.split("*")[0]
+    client = storage.Client()
+    blobs = client.list_blobs(bucket_name, prefix=prefix)
+    return [f"gs://{bucket_name}/{b.name}" for b in blobs]
+
+
 def get_fastq_list(fastq_path, gcp=False):
     """Get list of FASTQ files from GCP bucket or local directory"""
     if gcp:
-        cmd = f'gsutil ls {fastq_path} | grep "fastq.gz"'
-        result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
-        fastq_list = result.stdout.strip().split('\n')
+        fastq_list = [p for p in _gcs_ls(fastq_path) if p.endswith("fastq.gz")]
     else:
         fastq_list = [str(f) for f in Path(fastq_path).glob("*.fastq.gz")]
 
@@ -329,11 +340,9 @@ def load_sample_metadata_for_batch(batch_num, blob_path, bucket_base, batch_labe
     wildcard_pattern = f"{bucket_base}/{blob_path}/sample_metadata_*.csv"
 
     try:
-        cmd = f'gsutil ls {wildcard_pattern}'
-        result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
-        if result.returncode == 0 and result.stdout.strip():
-            # Get the first matching file
-            file_path = result.stdout.strip().split('\n')[0]
+        matches = [p for p in _gcs_ls(wildcard_pattern) if p.endswith('.csv') and 'sample_metadata_' in p.split('/')[-1]]
+        if matches:
+            file_path = matches[0]
             print(f"  Loading sample metadata: {file_path}")
             df = pd.read_csv(file_path)
             return df
@@ -343,9 +352,8 @@ def load_sample_metadata_for_batch(batch_num, blob_path, bucket_base, batch_labe
     # Fallback to sample_metadata.csv without date suffix
     try:
         pattern = f"{bucket_base}/{blob_path}/sample_metadata.csv"
-        cmd = f'gsutil ls {pattern}'
-        result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
-        if result.returncode == 0:
+        matches = _gcs_ls(pattern)
+        if matches:
             print(f"  Loading sample metadata: {pattern}")
             df = pd.read_csv(pattern)
             return df
@@ -355,10 +363,9 @@ def load_sample_metadata_for_batch(batch_num, blob_path, bucket_base, batch_labe
     # Try DMAQC metadata file (Sinai format)
     try:
         dmaqc_pattern = f"{bucket_base}/{blob_path}/metadata_dmaqc_*.csv"
-        cmd = f'gsutil ls {dmaqc_pattern}'
-        result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
-        if result.returncode == 0 and result.stdout.strip():
-            file_path = result.stdout.strip().split('\n')[0]
+        matches = [p for p in _gcs_ls(dmaqc_pattern) if p.endswith('.csv') and 'metadata_dmaqc_' in p.split('/')[-1]]
+        if matches:
+            file_path = matches[0]
             print(f"  Loading DMAQC metadata: {file_path}")
             df = pd.read_csv(file_path)
 
