@@ -106,11 +106,13 @@ gs_copy_gcp() {
   gsutil cp -n "${dir}qc/qc.html" "${DOWNLOAD_DIR}/qc/${condition}.qc.html"
 }
 
+mapfile -t croo_dirs < <(gsutil ls "$CROO_OUTPUT_PATH" | grep -E "/$" | grep -v "final")
+
 if [[ "$copy_dest" == "gcp" ]]; then
   export -f gs_copy_gcp
   export DOWNLOAD_DIR
-  parallel --progress --bar --verbose --jobs "$NUM_CORES" gs_copy_gcp ::: "$(gsutil ls "$CROO_OUTPUT_PATH" | grep -E "/$" | grep -v "final")"
+  parallel --progress --bar --verbose --jobs "$NUM_CORES" gs_copy_gcp ::: "${croo_dirs[@]}"
 else
   export -f gs_copy
-  parallel --progress --bar --verbose --jobs "$NUM_CORES" gs_copy ::: "$(gsutil ls "$CROO_OUTPUT_PATH" | grep -E "/$" | grep -v "final")"
+  parallel --progress --bar --verbose --jobs "$NUM_CORES" gs_copy ::: "${croo_dirs[@]}"
 fi
