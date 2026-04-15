@@ -358,7 +358,6 @@ def load_sample_metadata_for_batch(batch_num, blob_path, bucket_base, batch_labe
             print(f"  Loading sample metadata: {pattern}")
             df = pd.read_csv(pattern)
             return df
-    except:
     except subprocess.CalledProcessError as e:
         print(f"  Error listing specific file: {e}")
         pass
