@@ -102,6 +102,7 @@ For additional details not directly related to running the ENCODE ATAC-seq pipel
     - [Genome Databases](#genome-databases)
     - [Change History](#change-history)
     - [Known Limitations](#known-limitations)
+  - [12. License](#12-license)
 
 ## 1. Prerequisites
 
@@ -839,3 +840,7 @@ Major updates and changes are documented in the repository's commit history. Che
 - Custom rn6 genome database requires manual configuration in `build_genome_data.sh`
 - TSS enrichment cutoffs are tissue-specific and need retrospective evaluation
 - Some QC thresholds are more relaxed than ENCODE standards to accommodate MoTrPAC sample characteristics
+
+## 12. License
+
+This project is licensed under the MIT License. See [LICENSE.md](LICENSE.md) for the full license text.
